@@ -189,6 +189,22 @@ Deploy
 
 ---
 
+## 5.1 Dashboard Layout Rule
+
+Dashboard 구현 시 다음 규칙을 따른다.
+
+- Dashboard는 height: 100vh 기준으로 구현한다.
+- body와 html에는 Dashboard에서 세로 스크롤이 생기지 않아야 한다.
+- 좌측 Calendar는 항상 전체 월간 달력이 한 화면 안에 보여야 한다.
+- Desktop Layout 비율은 좌측 72%, 우측 28%를 사용한다.
+- 우측 카드(오늘 일정 / 이번 주 일정 / TODO)는 각각 독립적인 overflow-y: auto를 사용한다.
+- Dashboard 내부에는 새 공고 등록 버튼을 두지 않는다.
+- Top Navigation의 새 공고 등록 버튼만 사용한다.
+- 카드 높이는 고정하고 내용만 내부 스크롤한다.
+- Dashboard 구현 시 페이지 자체 스크롤을 만들지 않는다.
+
+---
+
 # 6. Milestones
 
 Milestone 1
@@ -340,6 +356,20 @@ docs: update database document
 Dashboard
 
 □ 정상 표시
+
+□ 100vh 적용 여부
+
+□ 페이지 스크롤 없음
+
+□ 달력이 한 화면에 모두 표시되는지
+
+□ 우측 카드 내부 스크롤 확인
+
+□ Dashboard 내부 새 공고 등록 버튼 없음
+
+□ Top Navigation 버튼만 존재
+
+□ Desktop 72:28 비율 유지
 
 Calendar
 

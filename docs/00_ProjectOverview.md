@@ -208,6 +208,15 @@ Database는
 
 모든 페이지는 동일한 Design System을 사용한다.
 
+## Layout Principle
+
+CareerBase의 주요 화면(Dashboard, Jobs, Calendar, Applications)은 가능한 한 페이지 전체 스크롤을 사용하지 않는다.
+
+사용자가 자주 확인하는 정보는 한 화면에서 확인 가능해야 하며,
+정보가 많아질 경우 페이지를 늘리는 대신 Card 또는 Panel 내부에서만 스크롤하도록 구현한다.
+
+새로운 화면을 구현할 때도 이 원칙을 기본 UX 규칙으로 사용한다.
+
 ---
 
 # 9. Component Rules
