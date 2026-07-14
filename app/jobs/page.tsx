@@ -1,10 +1,5 @@
-import { PlaceholderPage } from '@/components/layout';
+import { JobsPage as JobsFeaturePage } from '@/features/jobs';
 
 export default function JobsPage() {
-  return (
-    <PlaceholderPage
-      title="Jobs"
-      description="공고 관리 화면의 placeholder입니다."
-    />
-  );
+  return <JobsFeaturePage />;
 }

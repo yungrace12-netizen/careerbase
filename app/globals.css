@@ -90,3 +90,105 @@
     @apply font-sans;
   }
 }
+
+@layer components {
+  .careerbase-calendar {
+    --fc-border-color: var(--border);
+    --fc-page-bg-color: var(--surface);
+    --fc-neutral-bg-color: var(--background);
+    --fc-today-bg-color: color-mix(in srgb, var(--primary) 10%, transparent);
+    --fc-button-bg-color: var(--surface);
+    --fc-button-border-color: var(--border);
+    --fc-button-text-color: var(--text-primary);
+    --fc-button-hover-bg-color: var(--background);
+    --fc-button-hover-border-color: var(--border);
+    --fc-button-active-bg-color: var(--primary);
+    --fc-button-active-border-color: var(--primary);
+    --fc-event-bg-color: transparent;
+    --fc-event-border-color: transparent;
+    --fc-event-text-color: var(--text-primary);
+  }
+
+  .careerbase-calendar .fc {
+    font-family: var(--font-pretendard), system-ui, sans-serif;
+  }
+
+  .careerbase-calendar .fc-toolbar {
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .careerbase-calendar .fc-toolbar-title {
+    color: var(--text-primary);
+    font-size: var(--text-section);
+    font-weight: 600;
+  }
+
+  .careerbase-calendar .fc-button {
+    min-height: var(--touch-target);
+    border-radius: var(--radius-button);
+    padding: 0 1rem;
+    box-shadow: none;
+    font-size: var(--text-small);
+    font-weight: 500;
+  }
+
+  .careerbase-calendar .fc-button:focus {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+
+  .careerbase-calendar .fc-scrollgrid,
+  .careerbase-calendar .fc-theme-standard td,
+  .careerbase-calendar .fc-theme-standard th {
+    border-color: var(--border);
+  }
+
+  .careerbase-calendar .fc-scrollgrid {
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    background: var(--surface);
+  }
+
+  .careerbase-calendar .fc-col-header-cell {
+    background: var(--background);
+    padding: 0.5rem 0;
+  }
+
+  .careerbase-calendar .fc-col-header-cell-cushion,
+  .careerbase-calendar .fc-daygrid-day-number {
+    color: var(--text-secondary);
+    font-size: var(--text-caption);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .careerbase-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+    display: inline-flex;
+    width: 1.75rem;
+    height: 1.75rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-badge);
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  .careerbase-calendar .fc-daygrid-day-frame {
+    min-height: 7rem;
+    padding: 0.25rem;
+  }
+
+  .careerbase-calendar--compact .fc-daygrid-day-frame {
+    min-height: 5rem;
+  }
+
+  .careerbase-calendar .fc-daygrid-event {
+    border-radius: var(--radius-badge);
+    padding: 0.125rem 0.25rem;
+  }
+
+  .careerbase-calendar-selected-day {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+  }
+}

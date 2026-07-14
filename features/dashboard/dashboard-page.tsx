@@ -7,6 +7,7 @@ import {
   PageHeader,
   PageWrapper,
 } from '@/components/layout';
+import { calendarSchedules } from '@/features/calendar';
 import { CalendarPreviewCard } from './calendar-preview-card';
 import { dashboardData, type DashboardData } from './dashboard-data';
 import { DashboardEmptyState } from './dashboard-empty-state';
@@ -49,10 +50,7 @@ function DashboardPage({ data = dashboardData }: DashboardPageProps) {
           ) : (
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(360px,0.9fr)]">
               <div className="flex min-w-0 flex-col gap-6">
-                <CalendarPreviewCard
-                  monthLabel={data.monthLabel}
-                  days={data.calendarDays}
-                />
+                <CalendarPreviewCard schedules={calendarSchedules} />
                 <RecentJobsCard jobs={data.recentJobs} />
               </div>
 

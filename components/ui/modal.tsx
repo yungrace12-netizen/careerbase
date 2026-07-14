@@ -16,6 +16,7 @@ export interface ModalProps {
   cancelLabel?: string;
   confirmLabel?: string;
   onConfirm?: () => void;
+  footer?: React.ReactNode;
   /** Danger Action은 빨간색 확인 버튼 (06_DesignSystem) */
   danger?: boolean;
   className?: string;
@@ -30,6 +31,7 @@ function Modal({
   cancelLabel = '취소',
   confirmLabel = '확인',
   onConfirm,
+  footer,
   danger = false,
   className,
 }: ModalProps) {
@@ -106,23 +108,32 @@ function Modal({
 
         {children ? <div data-slot="modal-body">{children}</div> : null}
 
-        <div
-          data-slot="modal-footer"
-          className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"
-        >
-          <Button variant="secondary" onClick={() => onOpenChange(false)}>
-            {cancelLabel}
-          </Button>
-          <Button
-            variant={danger ? 'danger' : 'primary'}
-            onClick={() => {
-              onConfirm?.();
-              onOpenChange(false);
-            }}
+        {footer ? (
+          <div
+            data-slot="modal-footer"
+            className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"
           >
-            {confirmLabel}
-          </Button>
-        </div>
+            {footer}
+          </div>
+        ) : (
+          <div
+            data-slot="modal-footer"
+            className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"
+          >
+            <Button variant="secondary" onClick={() => onOpenChange(false)}>
+              {cancelLabel}
+            </Button>
+            <Button
+              variant={danger ? 'danger' : 'primary'}
+              onClick={() => {
+                onConfirm?.();
+                onOpenChange(false);
+              }}
+            >
+              {confirmLabel}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

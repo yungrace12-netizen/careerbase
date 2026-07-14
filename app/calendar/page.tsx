@@ -1,10 +1,5 @@
-import { PlaceholderPage } from '@/components/layout';
+import { CalendarPage as CalendarFeaturePage } from '@/features/calendar';
 
 export default function CalendarPage() {
-  return (
-    <PlaceholderPage
-      title="Calendar"
-      description="채용 일정 화면의 placeholder입니다."
-    />
-  );
+  return <CalendarFeaturePage />;
 }
