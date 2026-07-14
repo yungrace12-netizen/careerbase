@@ -1,0 +1,91 @@
+/* CareerBase Design Tokens - 06_DesignSystem.md */
+
+:root {
+  /* Colors */
+  --primary: #3B82F6;
+  --primary-foreground: #FFFFFF;
+
+  --background: #FAFAFA;
+  --surface: #FFFFFF;
+  --card: #FFFFFF;
+  --card-foreground: #111827;
+  --popover: #FFFFFF;
+  --popover-foreground: #111827;
+
+  --foreground: #111827;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: #3B82F6;
+
+  --secondary: #FAFAFA;
+  --secondary-foreground: #111827;
+
+  --muted: #FAFAFA;
+  --muted-foreground: #6B7280;
+
+  --accent: #FAFAFA;
+  --accent-foreground: #3B82F6;
+
+  --success: #22C55E;
+  --success-foreground: #FFFFFF;
+
+  --warning: #F59E0B;
+  --warning-foreground: #111827;
+
+  --danger: #EF4444;
+  --danger-foreground: #FFFFFF;
+  --destructive: #EF4444;
+
+  /* Radius — Design System */
+  --radius: 0.75rem;
+  --radius-button: 0.75rem;
+  --radius-card: 0.75rem;
+  --radius-input: 0.75rem;
+  --radius-modal: 1rem;
+  --radius-badge: 999px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-dropdown: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-modal: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 250ms;
+  --toast-duration: 2500ms;
+
+  /* Layout */
+  --container-max-width: 1440px;
+  --section-gap: 24px;
+  --component-padding: 24px;
+  --button-height: 48px;
+  --input-height: 48px;
+  --textarea-min-height: 160px;
+  --modal-width: 560px;
+  --touch-target: 44px;
+
+  /* Sidebar (reserved for later sprints) */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #111827;
+  --sidebar-primary: #3B82F6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #FAFAFA;
+  --sidebar-accent-foreground: #111827;
+  --sidebar-border: #E5E7EB;
+  --sidebar-ring: #3B82F6;
+
+  /* Charts (placeholder mapping) */
+  --chart-1: #3B82F6;
+  --chart-2: #22C55E;
+  --chart-3: #F59E0B;
+  --chart-4: #EF4444;
+  --chart-5: #6B7280;
+}
+
+/* MVP is light theme only (04_Database AppSettings) */
