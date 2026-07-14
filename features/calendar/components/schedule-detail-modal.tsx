@@ -36,7 +36,9 @@ function ScheduleDetailModal({
             일정 유형
           </Typography>
           <div>
-            <Badge variant="primary">{schedule.type}</Badge>
+            <Badge variant={schedule.type === '지원 마감' ? 'danger' : 'primary'}>
+              {schedule.type}
+            </Badge>
           </div>
         </div>
         <DetailRow

@@ -9,7 +9,6 @@ import type { EventClickArg, EventContentArg } from '@fullcalendar/core';
 import type { EventInput } from '@fullcalendar/core';
 import type { DateClickArg } from '@fullcalendar/interaction';
 
-import { Badge } from '@/components/ui/badge';
 import { Typography } from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
 import type { CalendarSchedule } from '@/features/calendar/calendar-data';
@@ -19,16 +18,20 @@ interface CareerBaseCalendarProps {
   schedules: CalendarSchedule[];
   selectedDate?: string;
   compact?: boolean;
+  fullHeight?: boolean;
   onDateClick?: (date: string) => void;
   onScheduleClick?: (schedule: CalendarSchedule) => void;
+  onMoreLinkClick?: (date: string) => void;
 }
 
 function CareerBaseCalendar({
   schedules,
   selectedDate,
   compact = false,
+  fullHeight = false,
   onDateClick,
   onScheduleClick,
+  onMoreLinkClick,
 }: CareerBaseCalendarProps) {
   const eventSchedules = React.useMemo(
     () => getExactSchedules(schedules),
@@ -73,16 +76,28 @@ function CareerBaseCalendar({
       const schedule = arg.event.extendedProps.schedule as CalendarSchedule;
 
       return (
-        <div className="flex min-w-0 items-center gap-1">
-          <span className="size-2 shrink-0 rounded-[var(--radius-badge)] bg-primary" />
+        <div
+          className={cn(
+            'flex min-w-0 items-center gap-1 rounded-[var(--radius-badge)] px-2 py-0.5',
+            schedule.type === '지원 마감'
+              ? 'bg-danger/10 text-danger'
+              : 'bg-primary/10 text-primary',
+          )}
+        >
+          <span className="shrink-0 text-[length:var(--text-caption)] font-semibold">
+            {schedule.type}
+          </span>
+          <span className="shrink-0 text-[length:var(--text-caption)]">
+            -
+          </span>
           {compact ? (
             <span className="truncate text-[length:var(--text-caption)]">
-              {schedule.type}
+              {schedule.companyName}
             </span>
           ) : (
-            <Badge variant="primary" className="max-w-full truncate px-2 py-1">
-              {schedule.type} · {schedule.companyName}
-            </Badge>
+            <span className="truncate text-[length:var(--text-caption)] font-medium">
+              {schedule.companyName}
+            </span>
           )}
         </div>
       );
@@ -114,9 +129,13 @@ function CareerBaseCalendar({
         eventContent={renderEventContent}
         eventClick={handleEventClick}
         dateClick={handleDateClick}
-        height={compact ? 520 : 'auto'}
+        height={fullHeight ? '100%' : compact ? 520 : 'auto'}
         dayMaxEvents={compact ? 2 : 3}
-        fixedWeekCount={false}
+        moreLinkClick={(arg) => {
+          onMoreLinkClick?.(formatCalendarDate(arg.date));
+        }}
+        moreLinkContent={(arg) => `+${arg.num}개 더보기`}
+        fixedWeekCount={fullHeight}
         showNonCurrentDates
         nowIndicator={false}
         eventDisplay="block"
@@ -127,9 +146,11 @@ function CareerBaseCalendar({
             : []
         }
       />
-      <Typography variant="caption" tone="secondary" className="mt-3 block">
-        월간 보기만 지원합니다.
-      </Typography>
+      {fullHeight ? null : (
+        <Typography variant="caption" tone="secondary" className="mt-3 block">
+          월간 보기만 지원합니다.
+        </Typography>
+      )}
     </div>
   );
 }

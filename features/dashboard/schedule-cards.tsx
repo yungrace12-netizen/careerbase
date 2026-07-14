@@ -9,27 +9,34 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Typography } from '@/components/ui/typography';
+import { cn } from '@/lib/utils';
 import { DashboardEmptyState } from './dashboard-empty-state';
 import type { DashboardSchedule } from './dashboard-data';
 
 interface TodayScheduleCardProps {
   schedules: DashboardSchedule[];
+  className?: string;
 }
 
 interface ThisWeekCardProps {
   schedules: DashboardSchedule[];
+  className?: string;
 }
 
-function TodayScheduleCard({ schedules }: TodayScheduleCardProps) {
+function TodayScheduleCard({ schedules, className }: TodayScheduleCardProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>오늘 일정</CardTitle>
-        <CardDescription>마감과 면접 일정을 빠르게 확인합니다.</CardDescription>
+    <Card className={cn('min-h-0 overflow-hidden gap-2 p-3', className)}>
+      <CardHeader className="shrink-0 gap-0.5">
+        <CardTitle className="text-[length:var(--text-body)]">
+          오늘 일정
+        </CardTitle>
+        <CardDescription className="truncate text-[length:var(--text-caption)]">
+          마감과 면접 일정
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-0 flex-1 overflow-y-auto pr-1">
         {schedules.length > 0 ? (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {schedules.map((schedule) => (
               <ScheduleListItem key={schedule.id} schedule={schedule} compact />
             ))}
@@ -45,16 +52,20 @@ function TodayScheduleCard({ schedules }: TodayScheduleCardProps) {
   );
 }
 
-function ThisWeekCard({ schedules }: ThisWeekCardProps) {
+function ThisWeekCard({ schedules, className }: ThisWeekCardProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>이번 주 일정</CardTitle>
-        <CardDescription>이번 주 마감과 발표 일정을 정리합니다.</CardDescription>
+    <Card className={cn('min-h-0 overflow-hidden gap-2 p-3', className)}>
+      <CardHeader className="shrink-0 gap-0.5">
+        <CardTitle className="text-[length:var(--text-body)]">
+          이번 주 일정
+        </CardTitle>
+        <CardDescription className="truncate text-[length:var(--text-caption)]">
+          이번 주 마감과 발표
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-0 flex-1 overflow-y-auto pr-1">
         {schedules.length > 0 ? (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {schedules.map((schedule) => (
               <ScheduleListItem key={schedule.id} schedule={schedule} />
             ))}
@@ -78,8 +89,8 @@ function ScheduleListItem({
   compact?: boolean;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-[var(--radius-card)] border border-border bg-background p-3">
-      <div className="mt-1 flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-primary/10 text-primary">
+    <div className="flex items-start gap-2 rounded-[var(--radius-card)] border border-border bg-background p-2">
+      <div className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-primary/10 text-primary">
         <Clock className="size-4" aria-hidden />
       </div>
       <div className="min-w-0 flex-1">
@@ -89,7 +100,7 @@ function ScheduleListItem({
             {compact ? schedule.timeLabel ?? schedule.dDay : schedule.dateLabel}
           </Typography>
         </div>
-        <Typography variant="small" className="mt-2 font-medium">
+        <Typography variant="small" className="mt-1 font-medium">
           {schedule.companyName}
         </Typography>
         <Typography variant="caption" tone="secondary">

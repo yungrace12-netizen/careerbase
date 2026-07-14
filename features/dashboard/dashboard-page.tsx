@@ -1,6 +1,3 @@
-import { Plus } from 'lucide-react';
-
-import { Button } from '@/components/ui/button';
 import {
   Container,
   ContentWrapper,
@@ -10,58 +7,37 @@ import {
 import { calendarSchedules } from '@/features/calendar';
 import { CalendarPreviewCard } from './calendar-preview-card';
 import { dashboardData, type DashboardData } from './dashboard-data';
-import { DashboardEmptyState } from './dashboard-empty-state';
-import { RecentJobsCard } from './recent-jobs-card';
-import { StatisticsCard } from './statistics-card';
 import { ThisWeekCard, TodayScheduleCard } from './schedule-cards';
-import { TodoCard } from './todo-card';
 
 interface DashboardPageProps {
   data?: DashboardData;
 }
 
 function DashboardPage({ data = dashboardData }: DashboardPageProps) {
-  const dashboardIsEmpty =
-    data.todaySchedules.length === 0 &&
-    data.weekSchedules.length === 0 &&
-    data.todos.length === 0 &&
-    data.recentJobs.length === 0 &&
-    data.statistics.every((statistic) => statistic.value === 0);
-
   return (
-    <PageWrapper>
-      <Container>
-        <ContentWrapper>
+    <PageWrapper className="py-4 xl:h-[calc(100dvh-4rem)] xl:gap-0 xl:overflow-hidden xl:py-3">
+      <Container className="xl:h-full xl:px-4">
+        <ContentWrapper className="gap-4 xl:h-full xl:gap-3 xl:overflow-hidden">
           <PageHeader
+            className="xl:gap-1"
             title="대시보드"
-            description="오늘의 일정과 지원 현황을 한 화면에서 확인하세요."
-          >
-            <Button type="button" aria-label="새 공고 등록">
-              <Plus className="size-5" aria-hidden />
-              새 공고 등록
-            </Button>
-          </PageHeader>
+            description="오늘 일정과 이번 주 일정을 확인하세요."
+          />
 
-          {dashboardIsEmpty ? (
-            <DashboardEmptyState
-              title="아직 Dashboard에 표시할 데이터가 없습니다."
-              description="공고를 등록하면 일정, TODO, 통계가 이곳에 표시됩니다."
-            />
-          ) : (
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(360px,0.9fr)]">
-              <div className="flex min-w-0 flex-col gap-6">
-                <CalendarPreviewCard schedules={calendarSchedules} />
-                <RecentJobsCard jobs={data.recentJobs} />
-              </div>
+          <div className="grid grid-cols-1 gap-4 xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(0,68fr)_minmax(360px,32fr)] xl:grid-rows-1 xl:gap-3 xl:overflow-hidden 2xl:grid-cols-[minmax(0,70fr)_minmax(400px,30fr)]">
+            <CalendarPreviewCard schedules={calendarSchedules} />
 
-              <div className="flex min-w-0 flex-col gap-6">
-                <TodayScheduleCard schedules={data.todaySchedules} />
-                <ThisWeekCard schedules={data.weekSchedules} />
-                <TodoCard todos={data.todos} />
-                <StatisticsCard statistics={data.statistics} />
-              </div>
+            <div className="flex min-w-0 flex-col gap-4 xl:min-h-0 xl:gap-3 xl:overflow-hidden">
+              <TodayScheduleCard
+                schedules={data.todaySchedules}
+                className="xl:flex-1"
+              />
+              <ThisWeekCard
+                schedules={data.weekSchedules}
+                className="xl:flex-1"
+              />
             </div>
-          )}
+          </div>
         </ContentWrapper>
       </Container>
     </PageWrapper>

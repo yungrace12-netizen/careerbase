@@ -1,5 +1,5 @@
-import { CalendarPage as CalendarFeaturePage } from '@/features/calendar';
+import { redirect } from 'next/navigation';
 
 export default function CalendarPage() {
-  return <CalendarFeaturePage />;
+  redirect('/');
 }

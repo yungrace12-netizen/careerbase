@@ -13,22 +13,27 @@ import type { DashboardTodo } from './dashboard-data';
 
 interface TodoCardProps {
   todos: DashboardTodo[];
+  className?: string;
 }
 
-function TodoCard({ todos }: TodoCardProps) {
+function TodoCard({ todos, className }: TodoCardProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>TODO</CardTitle>
-        <CardDescription>자동 생성 TODO와 직접 TODO를 구분합니다.</CardDescription>
+    <Card className={cn('min-h-0 overflow-hidden gap-2 p-3', className)}>
+      <CardHeader className="shrink-0 gap-0.5">
+        <CardTitle className="text-[length:var(--text-body)]">
+          TODO
+        </CardTitle>
+        <CardDescription className="truncate text-[length:var(--text-caption)]">
+          자동 TODO와 직접 TODO
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-0 flex-1 overflow-y-auto pr-1">
         {todos.length > 0 ? (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {todos.map((todo) => (
               <label
                 key={todo.id}
-                className="flex items-start gap-3 rounded-[var(--radius-card)] border border-border bg-background p-3"
+                className="flex items-start gap-2 rounded-[var(--radius-card)] border border-border bg-background p-2"
               >
                 <input
                   type="checkbox"

@@ -57,9 +57,7 @@ CareerBase MVP의 목표는 다음과 같다.
 
 이번 MVP에서는 다음 기능만 구현한다.
 
-Dashboard
-
-Calendar
+Calendar Home
 
 Applications
 
@@ -113,13 +111,13 @@ Sidebar
 
 Step 5
 
-Dashboard
+Calendar Home
 
 ↓
 
 Step 6
 
-Calendar
+Job Detail
 
 ↓
 
@@ -131,77 +129,79 @@ Applications
 
 Step 8
 
-Job Detail
+Essay
 
 ↓
 
 Step 9
 
-Essay
+Interview
 
 ↓
 
 Step 10
 
-Interview
+Experience Library
 
 ↓
 
 Step 11
 
-Experience Library
+Profile
 
 ↓
 
 Step 12
 
-Profile
+Archive
 
 ↓
 
 Step 13
 
-Archive
+Search
 
 ↓
 
 Step 14
 
-Settings
-
-↓
-
-Step 15
-
-JSON Backup
-
-↓
-
-Step 16
-
-Testing
-
-↓
-
-Step 17
-
-Deploy
+Final QA
 
 ---
 
-## 5.1 Dashboard Layout Rule
+## 5.1 Calendar Home Layout Rule
 
-Dashboard 구현 시 다음 규칙을 따른다.
+Calendar Home 구현 시 다음 규칙을 따른다.
 
-- Dashboard는 height: 100vh 기준으로 구현한다.
-- body와 html에는 Dashboard에서 세로 스크롤이 생기지 않아야 한다.
-- 좌측 Calendar는 항상 전체 월간 달력이 한 화면 안에 보여야 한다.
-- Desktop Layout 비율은 좌측 72%, 우측 28%를 사용한다.
-- 우측 카드(오늘 일정 / 이번 주 일정 / TODO)는 각각 독립적인 overflow-y: auto를 사용한다.
-- Dashboard 내부에는 새 공고 등록 버튼을 두지 않는다.
+- Calendar Home은 height: 100vh 기준으로 구현한다.
+- body와 html에는 Calendar Home에서 세로 스크롤이 생기지 않아야 한다.
+- Calendar는 Top Bar 아래 남은 화면 전체를 사용한다.
+- 전체 월간 달력 6주가 한 화면 안에 보여야 한다.
+- Calendar 내부에는 세로 스크롤바가 생기지 않아야 한다.
 - Top Navigation의 새 공고 등록 버튼만 사용한다.
-- 카드 높이는 고정하고 내용만 내부 스크롤한다.
-- Dashboard 구현 시 페이지 자체 스크롤을 만들지 않는다.
+- 지원 마감은 Danger 계열로 표시하고, 그 외 일정은 Primary 계열로 표시한다.
+- 일정은 색상만으로 구분하지 않고 일정 유형 전체명을 함께 표시한다.
+- 한 날짜의 일정이 셀 높이를 초과하면 `+N개 더보기`를 표시한다.
+- `+N개 더보기` 클릭 시 해당 날짜의 전체 일정을 Modal로 표시한다.
+- Calendar Home 구현 시 페이지 자체 스크롤을 만들지 않는다.
+
+---
+
+## 5.2 Sprint5 이후 개발 원칙
+
+Sprint5부터는 문서를 새로 수정하지 않는다.
+
+기존 문서를 기준으로 아래 순서대로 기능만 구현한다.
+
+- Sprint5: Job Detail
+- Sprint6: Applications
+- Sprint7: Essay
+- Sprint8: Interview
+- Sprint9: Experience
+- Sprint10: Profile
+- Sprint11: Archive
+- Sprint12: Search
+- Sprint13: Final QA
 
 ---
 
@@ -217,7 +217,7 @@ Milestone 2
 
 Milestone 3
 
-Dashboard 완성
+Calendar Home 완성
 
 Milestone 4
 
@@ -277,7 +277,7 @@ Cursor는 항상 다음 순서를 따른다.
 
 좋은 예
 
-"Dashboard 화면만 구현"
+"Calendar Home 화면만 구현"
 
 "Calendar 컴포넌트만 구현"
 
@@ -353,7 +353,7 @@ docs: update database document
 
 모든 기능은 아래 항목을 확인한다.
 
-Dashboard
+Calendar Home
 
 □ 정상 표시
 
@@ -361,15 +361,21 @@ Dashboard
 
 □ 페이지 스크롤 없음
 
-□ 달력이 한 화면에 모두 표시되는지
+□ 월간 달력 6주가 한 화면에 모두 표시되는지
 
-□ 우측 카드 내부 스크롤 확인
+□ 달력 내부 스크롤 없음
 
-□ Dashboard 내부 새 공고 등록 버튼 없음
+□ 지원 마감 Danger 계열 표시
+
+□ 그 외 일정 Primary 계열 표시
+
+□ 일정 유형 전체명 표시
+
+□ `+N개 더보기` Modal 확인
 
 □ Top Navigation 버튼만 존재
 
-□ Desktop 72:28 비율 유지
+□ `/calendar`에서 `/`로 redirect
 
 Calendar
 
@@ -535,7 +541,7 @@ CareerBase MVP는 다음 조건을 만족해야 한다.
 
 - Auto Save 정상 동작
 
-- Dashboard 정상 동작
+- Calendar Home 정상 동작
 
 - Calendar 정상 동작
 

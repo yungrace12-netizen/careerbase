@@ -74,8 +74,6 @@ Archive
 
 모든 화면에서는 아래 메뉴로 이동할 수 있다.
 
-Dashboard
-
 Calendar
 
 Jobs
@@ -121,7 +119,7 @@ Welcome
 
 ↓
 
-Dashboard
+Calendar
 
 ↓
 
@@ -133,13 +131,13 @@ Dashboard
 
 ---
 
-# 5. Dashboard Flow
+# 5. Calendar Home Flow
 
 앱 실행
 
 ↓
 
-Dashboard
+Calendar
 
 ↓
 
@@ -147,37 +145,17 @@ Dashboard
 
 ↓
 
-오늘 일정 확인
-
-↓
-
-이번 주 일정 확인
-
-↓
-
-TODO 확인
-
-↓
-
-지원 통계 확인
-
-↓
-
-최근 등록 공고 확인
+일정 유형 확인
 
 ↓
 
 원하는 메뉴 이동
 
-Dashboard는 항상 서비스의 시작점이다.
+Calendar는 항상 서비스의 시작점이다.
 
 ---
 
 # 6. Calendar Flow
-
-Dashboard
-
-↓
 
 Calendar
 
@@ -191,19 +169,11 @@ Calendar
 
 ↓
 
-공고 상세 이동
+일정 상세 Modal 확인
 
 ↓
 
-지원현황 확인
-
-↓
-
-필요 시 일정 수정
-
-↓
-
-저장
+필요 시 관련 공고 확인
 
 ---
 
@@ -757,7 +727,7 @@ JSON Import
 
 # 22. UX Rules
 
-Dashboard는 항상 서비스의 시작 화면이다.
+Calendar는 항상 서비스의 시작 화면이다.
 
 달력은 가장 먼저 보여야 한다.
 
@@ -791,8 +761,6 @@ Mobile
 Bottom Navigation을 기본으로 한다.
 
 공통적으로
-
-Dashboard
 
 Calendar
 

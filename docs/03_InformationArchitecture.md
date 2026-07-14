@@ -24,7 +24,6 @@ Desktop
 
 Sidebar Navigation
 
-- Dashboard
 - Calendar
 - Jobs
 - Applications
@@ -41,7 +40,6 @@ Mobile
 
 Bottom Navigation
 
-- Dashboard
 - Calendar
 - Jobs
 - Profile
@@ -56,13 +54,15 @@ More
 
 ---
 
-# 3. Dashboard
+# 3. Calendar Home
 
 서비스의 시작 화면
 
+Route: `/`
+
 ## Sections
 
-### Calendar
+### Monthly Calendar
 
 - 월간 달력
 - 오늘 날짜 강조
@@ -70,56 +70,25 @@ More
 
 ---
 
-### Today
+### Event Display
 
-- 오늘 일정
-- 오늘 마감 공고
-- 오늘 면접
-
----
-
-### This Week
-
-- 이번 주 일정
-- 이번 주 마감 공고
+- 지원 마감은 Danger 계열로 표시
+- 그 외 일정은 Primary 계열로 표시
+- 일정 유형 전체명과 기업명을 함께 표시
 
 ---
 
-### TODO
+### More Events
 
-자동 생성
+한 날짜에 표시 가능한 일정을 초과하면 `+N개 더보기`를 표시한다.
 
-- 마감 임박
-- 면접 준비
-- 제출 필요
-
-사용자 직접 추가 가능
-
----
-
-### Statistics
-
-- 전체 지원
-- 준비 중
-- 제출 완료
-- 전형 진행
-- 최종 합격
-- 최종 불합격
-- Archive
-
----
-
-### Recent Applications
-
-최근 등록한 공고
-
-최대 5개 표시
-
-클릭 시 공고 상세 이동
+`+N개 더보기` 클릭 시 해당 날짜의 전체 일정을 Modal로 표시한다.
 
 ---
 
 # 4. Calendar
+
+`/calendar`는 `/`로 redirect한다.
 
 ## Header
 
@@ -221,7 +190,7 @@ Breadcrumb
 
 예)
 
-Dashboard
+Calendar
 
 >
 

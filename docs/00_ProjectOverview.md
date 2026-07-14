@@ -210,12 +210,16 @@ Database는
 
 ## Layout Principle
 
-CareerBase의 주요 화면(Dashboard, Jobs, Calendar, Applications)은 가능한 한 페이지 전체 스크롤을 사용하지 않는다.
+CareerBase의 주요 화면(Calendar, Jobs, Applications)은 가능한 한 페이지 전체 스크롤을 사용하지 않는다.
 
 사용자가 자주 확인하는 정보는 한 화면에서 확인 가능해야 하며,
 정보가 많아질 경우 페이지를 늘리는 대신 Card 또는 Panel 내부에서만 스크롤하도록 구현한다.
 
 새로운 화면을 구현할 때도 이 원칙을 기본 UX 규칙으로 사용한다.
+
+CareerBase는 Dashboard 중심 서비스가 아니다.
+
+서비스의 첫 화면은 Calendar이며, 핵심 확인 영역은 월간 달력과 일정 유형별 표시로 구성한다.
 
 ---
 

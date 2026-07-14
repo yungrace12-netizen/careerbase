@@ -1,5 +1,5 @@
-import { DashboardPage as DashboardFeaturePage } from '@/features/dashboard';
+import { CalendarPage as CalendarFeaturePage } from '@/features/calendar';
 
-export default function DashboardPage() {
-  return <DashboardFeaturePage />;
+export default function HomePage() {
+  return <CalendarFeaturePage />;
 }

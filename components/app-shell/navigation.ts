@@ -3,8 +3,6 @@ import {
   BriefcaseBusiness,
   CalendarDays,
   FileStack,
-  Home,
-  LayoutDashboard,
   LucideIcon,
   Settings,
   UserRound,
@@ -19,13 +17,8 @@ export interface NavigationItem {
 
 export const desktopNavigationItems: NavigationItem[] = [
   {
-    label: 'Dashboard',
+    label: '캘린더',
     href: '/',
-    icon: LayoutDashboard,
-  },
-  {
-    label: 'Calendar',
-    href: '/calendar',
     icon: CalendarDays,
   },
   {
@@ -62,13 +55,8 @@ export const desktopNavigationItems: NavigationItem[] = [
 
 export const mobilePrimaryNavigationItems: NavigationItem[] = [
   {
-    label: 'Dashboard',
+    label: '캘린더',
     href: '/',
-    icon: Home,
-  },
-  {
-    label: 'Calendar',
-    href: '/calendar',
     icon: CalendarDays,
   },
   {
