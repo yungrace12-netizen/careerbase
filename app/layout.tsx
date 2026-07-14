@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { Metadata } from 'next';
+
+import { AppShell } from '@/components/app-shell';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -14,16 +16,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className="h-full antialiased">
-      <head>
-        <link
-          rel="stylesheet"
-          as="style"
-          crossOrigin="anonymous"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
-        />
-      </head>
       <body
-        className="flex min-h-full flex-col bg-background text-foreground"
+        className="min-h-full bg-background text-foreground"
         style={
           {
             '--font-pretendard':
@@ -31,7 +25,7 @@ export default function RootLayout({
           } as CSSProperties
         }
       >
-        {children}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
