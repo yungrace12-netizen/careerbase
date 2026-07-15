@@ -4,6 +4,7 @@ import type {
   Essay,
   Experience,
 } from '@/types/essay';
+import type { InterviewStage } from '@/types/interview';
 
 export interface OnboardingData {
   isCompleted: boolean;
@@ -60,7 +61,7 @@ export interface CareerBaseData {
   jobs: Job[];
   schedules: [];
   essays: Essay[];
-  interviews: [];
+  interviews: InterviewStage[];
   profile: Profile;
   experiences: Experience[];
   todos: [];

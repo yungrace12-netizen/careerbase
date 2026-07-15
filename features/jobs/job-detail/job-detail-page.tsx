@@ -28,6 +28,7 @@ import type { ApplicationBoardColumn, CreateJobInput, Job } from '@/types/job';
 import { JobFormModal } from '../job-form-modal';
 import { ApplicationsTab } from './applications-tab';
 import { EssayTab } from './essay-tab';
+import { InterviewTab } from './interview-tab';
 
 interface JobDetailPageProps {
   jobId: string;
@@ -155,6 +156,8 @@ function JobDetailPage({ jobId }: JobDetailPageProps) {
                 <JobInfoTab job={job} />
               ) : activeTab === 'essay' ? (
                 <EssayTab job={job} />
+              ) : activeTab === 'interview' ? (
+                <InterviewTab job={job} />
               ) : activeTab === 'application' ? (
                 <ApplicationsTab
                   job={job}
