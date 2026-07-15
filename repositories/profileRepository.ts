@@ -75,6 +75,8 @@ function normalizeProfile(profile: Profile): Profile {
       englishAddress: profile.personalInfo?.englishAddress ?? '',
       profilePhotoFileName: profile.personalInfo?.profilePhotoFileName ?? '',
       profilePhotoLocation: profile.personalInfo?.profilePhotoLocation ?? '',
+      profilePhotoDataUrl: profile.personalInfo?.profilePhotoDataUrl ?? '',
+      profilePhotoMimeType: profile.personalInfo?.profilePhotoMimeType ?? '',
       desiredSalary: profile.personalInfo?.desiredSalary ?? null,
       salaryCurrency: 'KRW',
       updatedAt: profile.personalInfo?.updatedAt ?? now,

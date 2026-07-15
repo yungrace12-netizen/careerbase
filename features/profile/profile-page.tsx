@@ -1,7 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronDown, Pencil, Plus, Save, Trash2 } from 'lucide-react';
+import {
+  ChevronDown,
+  Download,
+  ImageIcon,
+  Pencil,
+  Plus,
+  Save,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 
 import {
   Container,
@@ -17,11 +26,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { DateInput } from '@/components/ui/date-input';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Toast, ToastViewport } from '@/components/ui/toast';
 import { Typography } from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
 import {
@@ -147,6 +158,10 @@ function ProfilePage() {
   const [deleteTarget, setDeleteTarget] = React.useState<DeleteTarget | null>(
     null,
   );
+  const [toast, setToast] = React.useState<{
+    variant: 'success' | 'error';
+    title: string;
+  } | null>(null);
 
   React.useEffect(() => {
     loadProfile();
@@ -160,6 +175,22 @@ function ProfilePage() {
   };
 
   const closeEditor = () => setEditor(null);
+  const showSaveToast = (success: boolean) => {
+    setToast({
+      variant: success ? 'success' : 'error',
+      title: success
+        ? '저장되었습니다.'
+        : '저장하지 못했습니다. 잠시 후 다시 시도해주세요.',
+    });
+  };
+
+  const handleManualPersonalInfoSave = () => {
+    showSaveToast(savePersonalInfo());
+  };
+
+  const handleManualOtherInfoSave = () => {
+    showSaveToast(saveOtherInfo());
+  };
 
   const handleDelete = () => {
     if (!deleteTarget) {
@@ -223,7 +254,8 @@ function ProfilePage() {
                 profile={profile}
                 saveStatus={saveStatuses[statusKey('personalInfo')]}
                 onChange={updatePersonalInfoDraft}
-                onSave={savePersonalInfo}
+                onSave={handleManualPersonalInfoSave}
+                onToast={setToast}
               />
             </AccordionSection>
 
@@ -444,7 +476,7 @@ function ProfilePage() {
                 profile={profile}
                 saveStatus={saveStatuses[statusKey('otherInfo')]}
                 onChange={updateOtherInfoDraft}
-                onSave={saveOtherInfo}
+                onSave={handleManualOtherInfoSave}
               />
             </AccordionSection>
           </div>
@@ -466,59 +498,64 @@ function ProfilePage() {
             }
           }}
           onSubmit={(input) => {
-            switch (editor.kind) {
-              case 'highSchool':
-                if (editor.item) {
-                  updateHighSchool(editor.item.id, input as CreateHighSchoolInput);
-                } else {
-                  addHighSchool(input as CreateHighSchoolInput);
-                }
-                break;
-              case 'university':
-                if (editor.item) {
-                  updateUniversity(editor.item.id, input as CreateUniversityInput);
-                } else {
-                  addUniversity(input as CreateUniversityInput);
-                }
-                break;
-              case 'career':
-                if (editor.item) {
-                  updateCareer(editor.item.id, input as CreateCareerInput);
-                } else {
-                  addCareer(input as CreateCareerInput);
-                }
-                break;
-              case 'language':
-                if (editor.item) {
-                  updateLanguage(editor.item.id, input as CreateLanguageInput);
-                } else {
-                  addLanguage(input as CreateLanguageInput);
-                }
-                break;
-              case 'certificate':
-                if (editor.item) {
-                  updateCertificate(editor.item.id, input as CreateCertificateInput);
-                } else {
-                  addCertificate(input as CreateCertificateInput);
-                }
-                break;
-              case 'award':
-                if (editor.item) {
-                  updateAward(editor.item.id, input as CreateAwardInput);
-                } else {
-                  addAward(input as CreateAwardInput);
-                }
-                break;
-              case 'activity':
-                if (editor.item) {
-                  updateActivity(editor.item.id, input as CreateActivityInput);
-                } else {
-                  addActivity(input as CreateActivityInput);
-                }
-                break;
-            }
+            try {
+              switch (editor.kind) {
+                case 'highSchool':
+                  if (editor.item) {
+                    updateHighSchool(editor.item.id, input as CreateHighSchoolInput);
+                  } else {
+                    addHighSchool(input as CreateHighSchoolInput);
+                  }
+                  break;
+                case 'university':
+                  if (editor.item) {
+                    updateUniversity(editor.item.id, input as CreateUniversityInput);
+                  } else {
+                    addUniversity(input as CreateUniversityInput);
+                  }
+                  break;
+                case 'career':
+                  if (editor.item) {
+                    updateCareer(editor.item.id, input as CreateCareerInput);
+                  } else {
+                    addCareer(input as CreateCareerInput);
+                  }
+                  break;
+                case 'language':
+                  if (editor.item) {
+                    updateLanguage(editor.item.id, input as CreateLanguageInput);
+                  } else {
+                    addLanguage(input as CreateLanguageInput);
+                  }
+                  break;
+                case 'certificate':
+                  if (editor.item) {
+                    updateCertificate(editor.item.id, input as CreateCertificateInput);
+                  } else {
+                    addCertificate(input as CreateCertificateInput);
+                  }
+                  break;
+                case 'award':
+                  if (editor.item) {
+                    updateAward(editor.item.id, input as CreateAwardInput);
+                  } else {
+                    addAward(input as CreateAwardInput);
+                  }
+                  break;
+                case 'activity':
+                  if (editor.item) {
+                    updateActivity(editor.item.id, input as CreateActivityInput);
+                  } else {
+                    addActivity(input as CreateActivityInput);
+                  }
+                  break;
+              }
 
-            closeEditor();
+              showSaveToast(true);
+              closeEditor();
+            } catch {
+              showSaveToast(false);
+            }
           }}
           onCareerLongFieldAutoSave={(id, input) =>
             saveCareerLongFields(id, input)
@@ -542,6 +579,16 @@ function ProfilePage() {
           {deleteTarget?.message ?? '이 정보를 삭제할까요?'}
         </Typography>
       </Modal>
+
+      {toast ? (
+        <ToastViewport>
+          <Toast
+            variant={toast.variant}
+            title={toast.title}
+            onClose={() => setToast(null)}
+          />
+        </ToastViewport>
+      ) : null}
     </PageWrapper>
   );
 }
@@ -609,15 +656,15 @@ function ListSection<TItem>({
       onToggle={onToggle}
     >
       <div className="flex flex-col gap-4">
-        <div className="flex justify-end">
-          <Button type="button" onClick={onAdd}>
-            <Plus className="size-4" aria-hidden />
-            {addLabel}
-          </Button>
-        </div>
         {items.length > 0 ? (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {items.map(renderItem)}
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 gap-3">{items.map(renderItem)}</div>
+            <div className="flex justify-start">
+              <Button type="button" variant="secondary" onClick={onAdd}>
+                <Plus className="size-4" aria-hidden />
+                {addLabel}
+              </Button>
+            </div>
           </div>
         ) : (
           <EmptyState title={emptyTitle} actionLabel={addLabel} onAction={onAdd} />
@@ -642,9 +689,25 @@ function ProfileItemCard({
 }) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description || '요약 정보가 없습니다.'}</CardDescription>
+      <CardHeader className="gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <CardTitle>{title}</CardTitle>
+            <CardDescription className="mt-2">
+              {description || '요약 정보가 없습니다.'}
+            </CardDescription>
+          </div>
+          <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+            <Button type="button" variant="secondary" onClick={onEdit}>
+              <Pencil className="size-4" aria-hidden />
+              수정
+            </Button>
+            <Button type="button" variant="secondary" onClick={onDelete}>
+              <Trash2 className="size-4" aria-hidden />
+              삭제
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         {badges.length > 0 ? (
@@ -656,16 +719,6 @@ function ProfileItemCard({
             ))}
           </div>
         ) : null}
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Button type="button" variant="secondary" onClick={onEdit}>
-            <Pencil className="size-4" aria-hidden />
-            수정
-          </Button>
-          <Button type="button" variant="secondary" onClick={onDelete}>
-            <Trash2 className="size-4" aria-hidden />
-            삭제
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );
@@ -676,13 +729,56 @@ function PersonalInfoSection({
   saveStatus,
   onChange,
   onSave,
+  onToast,
 }: {
   profile: Profile;
   saveStatus?: ProfileSaveStatus;
   onChange: (input: UpdatePersonalInfoInput) => void;
   onSave: () => void;
+  onToast: (toast: { variant: 'success' | 'error'; title: string }) => void;
 }) {
   const personalInfo = profile.personalInfo;
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const profilePhotoDataUrl = personalInfo.profilePhotoDataUrl ?? '';
+  const profilePhotoFileName = personalInfo.profilePhotoFileName ?? '';
+
+  const handlePhotoFile = (file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      onToast({
+        variant: 'error',
+        title: 'jpg, jpeg, png, webp 이미지만 업로드할 수 있습니다.',
+      });
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      onToast({
+        variant: 'error',
+        title: '증명사진은 2MB 이하로 업로드해주세요.',
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      onChange({
+        profilePhotoFileName: file.name,
+        profilePhotoDataUrl: String(reader.result ?? ''),
+        profilePhotoMimeType: file.type,
+      });
+    };
+    reader.onerror = () => {
+      onToast({
+        variant: 'error',
+        title: '증명사진을 불러오지 못했습니다. 다시 시도해주세요.',
+      });
+    };
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div className="grid gap-4">
@@ -693,19 +789,99 @@ function PersonalInfoSection({
           수동 저장
         </Button>
       </div>
+      <section className="grid gap-3 rounded-[var(--radius-card)] border border-border bg-background p-4">
+        <Typography variant="small" className="font-medium">
+          증명사진
+        </Typography>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="flex size-32 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface">
+            {profilePhotoDataUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profilePhotoDataUrl}
+                alt="증명사진 미리보기"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-text-secondary">
+                <ImageIcon className="size-8" aria-hidden />
+                <Typography variant="caption" tone="secondary">
+                  사진 없음
+                </Typography>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-1 flex-col gap-3">
+            <Typography variant="caption" tone="secondary">
+              jpg, jpeg, png, webp 형식과 2MB 이하 파일을 지원합니다.
+            </Typography>
+            {profilePhotoFileName ? (
+              <Typography variant="caption" tone="secondary">
+                {profilePhotoFileName}
+              </Typography>
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="size-4" aria-hidden />
+                {profilePhotoDataUrl ? '증명사진 변경' : '증명사진 업로드'}
+              </Button>
+              {profilePhotoDataUrl ? (
+                <>
+                  <a
+                    href={profilePhotoDataUrl}
+                    download={profilePhotoFileName || 'profile-photo'}
+                    className={cn(
+                      'inline-flex min-h-[var(--button-height)] items-center justify-center gap-2 rounded-[var(--radius-button)] border border-border bg-surface px-4 text-[length:var(--text-small)] font-medium text-text-primary transition-colors hover:bg-muted',
+                    )}
+                  >
+                    <Download className="size-4" aria-hidden />
+                    다운로드
+                  </a>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() =>
+                      onChange({
+                        profilePhotoFileName: '',
+                        profilePhotoDataUrl: '',
+                        profilePhotoMimeType: '',
+                      })
+                    }
+                  >
+                    <Trash2 className="size-4" aria-hidden />
+                    삭제
+                  </Button>
+                </>
+              ) : null}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(event) => {
+                handlePhotoFile(event.target.files?.[0] ?? null);
+                event.target.value = '';
+              }}
+            />
+          </div>
+        </div>
+      </section>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Input
           label="이름"
           value={personalInfo.name}
           onChange={(event) => onChange({ name: event.target.value })}
         />
-        <Input
+        <DateInput
           label="생년월일"
-          type="date"
-          value={personalInfo.birthDate ?? ''}
-          onChange={(event) =>
-            onChange({ birthDate: nullableValue(event.target.value) })
-          }
+          value={personalInfo.birthDate}
+          disallowFuture
+          onChange={(birthDate) => onChange({ birthDate })}
         />
         <Input
           label="주소"
@@ -719,35 +895,24 @@ function PersonalInfoSection({
             onChange({ englishAddress: event.target.value })
           }
         />
-        <Input
-          label="증명사진 파일명"
-          hint="실제 파일 업로드 없이 파일명만 기록합니다."
-          value={personalInfo.profilePhotoFileName}
-          onChange={(event) =>
-            onChange({ profilePhotoFileName: event.target.value })
-          }
-        />
-        <Input
-          label="증명사진 보관 위치"
-          hint="파일 경로를 자동 탐색하지 않습니다."
-          value={personalInfo.profilePhotoLocation}
-          onChange={(event) =>
-            onChange({ profilePhotoLocation: event.target.value })
-          }
-        />
-        <Input
-          label="희망연봉"
-          inputMode="numeric"
-          value={numberToString(personalInfo.desiredSalary)}
-          onChange={(event) => {
-            if (!isNumericInput(event.target.value)) {
-              return;
-            }
+        <div className="relative">
+          <Input
+            label="희망연봉"
+            inputMode="numeric"
+            className="pr-12"
+            value={numberToString(personalInfo.desiredSalary)}
+            onChange={(event) => {
+              if (!isNumericInput(event.target.value)) {
+                return;
+              }
 
-            onChange({ desiredSalary: parseOptionalNumber(event.target.value) });
-          }}
-        />
-        <Input label="통화" value="KRW" disabled readOnly />
+              onChange({ desiredSalary: parseOptionalNumber(event.target.value) });
+            }}
+          />
+          <span className="pointer-events-none absolute right-4 bottom-3 text-[length:var(--text-small)] text-text-secondary">
+            원
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -982,21 +1147,19 @@ function HighSchoolForm({
         onChange={(event) => setDraft({ ...draft, schoolName: event.target.value })}
       />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Input
+        <DateInput
           label="입학일"
-          type="date"
           value={draft.admissionDate}
-          onChange={(event) =>
-            setDraft({ ...draft, admissionDate: event.target.value })
+          onChange={(admissionDate) =>
+            setDraft({ ...draft, admissionDate: admissionDate ?? '' })
           }
         />
-        <Input
+        <DateInput
           label="졸업일"
-          type="date"
           value={draft.graduationDate}
           error={errors.dateRange}
-          onChange={(event) =>
-            setDraft({ ...draft, graduationDate: event.target.value })
+          onChange={(graduationDate) =>
+            setDraft({ ...draft, graduationDate: graduationDate ?? '' })
           }
         />
       </div>
@@ -1073,21 +1236,19 @@ function UniversityForm({
         }
       />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Input
+        <DateInput
           label="입학일"
-          type="date"
           value={draft.admissionDate}
-          onChange={(event) =>
-            setDraft({ ...draft, admissionDate: event.target.value })
+          onChange={(admissionDate) =>
+            setDraft({ ...draft, admissionDate: admissionDate ?? '' })
           }
         />
-        <Input
+        <DateInput
           label="졸업일"
-          type="date"
           value={draft.graduationDate}
           error={dateErrors.dateRange}
-          onChange={(event) =>
-            setDraft({ ...draft, graduationDate: event.target.value })
+          onChange={(graduationDate) =>
+            setDraft({ ...draft, graduationDate: graduationDate ?? '' })
           }
         />
       </div>
@@ -1190,41 +1351,44 @@ function CareerForm({
         }
       />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Input
+        <DateInput
           label="재직 시작일"
-          type="date"
           value={draft.employmentStartDate}
-          onChange={(event) =>
-            setDraft({ ...draft, employmentStartDate: event.target.value })
-          }
-        />
-        <Input
-          label="재직 종료일"
-          type="date"
-          value={draft.employmentEndDate}
-          disabled={draft.isCurrentlyEmployed}
-          error={dateErrors.dateRange}
-          onChange={(event) =>
-            setDraft({ ...draft, employmentEndDate: event.target.value })
-          }
-        />
-      </div>
-      <label className="flex min-h-10 items-center gap-3 text-[length:var(--text-small)]">
-        <input
-          type="checkbox"
-          checked={draft.isCurrentlyEmployed}
-          onChange={(event) =>
+          onChange={(employmentStartDate) =>
             setDraft({
               ...draft,
-              isCurrentlyEmployed: event.target.checked,
-              employmentEndDate: event.target.checked
-                ? ''
-                : draft.employmentEndDate,
+              employmentStartDate: employmentStartDate ?? '',
             })
           }
         />
-        재직 중
-      </label>
+        <DateInput
+          label="재직 종료일"
+          value={draft.employmentEndDate}
+          disabled={draft.isCurrentlyEmployed}
+          error={dateErrors.dateRange}
+          onChange={(employmentEndDate) =>
+            setDraft({
+              ...draft,
+              employmentEndDate: employmentEndDate ?? '',
+            })
+          }
+        />
+      </div>
+      <Select
+        label="재직 여부"
+        value={draft.isCurrentlyEmployed ? 'current' : 'ended'}
+        onChange={(event) =>
+          setDraft({
+            ...draft,
+            isCurrentlyEmployed: event.target.value === 'current',
+            employmentEndDate:
+              event.target.value === 'current' ? '' : draft.employmentEndDate,
+          })
+        }
+      >
+        <option value="ended">퇴사</option>
+        <option value="current">재직 중</option>
+      </Select>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Input
           label="부서"
@@ -1262,16 +1426,21 @@ function CareerForm({
           {numberError}
         </Typography>
       ) : null}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Input
-          label="연봉"
-          inputMode="numeric"
-          value={draft.annualSalary}
-          onChange={(event) =>
-            setDraft({ ...draft, annualSalary: event.target.value })
-          }
-        />
-        <Input label="통화" value="KRW" disabled readOnly />
+      <div className="max-w-md">
+        <div className="relative">
+          <Input
+            label="연봉"
+            inputMode="numeric"
+            className="pr-12"
+            value={draft.annualSalary}
+            onChange={(event) =>
+              setDraft({ ...draft, annualSalary: event.target.value })
+            }
+          />
+          <span className="pointer-events-none absolute right-4 bottom-3 text-[length:var(--text-small)] text-text-secondary">
+            원
+          </span>
+        </div>
       </div>
     </FormShell>
   );
@@ -1337,11 +1506,10 @@ function LanguageForm({
           }
         />
       </div>
-      <Input
+      <DateInput
         label="응시일"
-        type="date"
         value={draft.testDate}
-        onChange={(event) => setDraft({ ...draft, testDate: event.target.value })}
+        onChange={(testDate) => setDraft({ ...draft, testDate: testDate ?? '' })}
       />
     </FormShell>
   );
@@ -1392,12 +1560,11 @@ function CertificateForm({
           setDraft({ ...draft, issuingOrganization: event.target.value })
         }
       />
-      <Input
+      <DateInput
         label="취득일자"
-        type="date"
         value={draft.acquisitionDate}
-        onChange={(event) =>
-          setDraft({ ...draft, acquisitionDate: event.target.value })
+        onChange={(acquisitionDate) =>
+          setDraft({ ...draft, acquisitionDate: acquisitionDate ?? '' })
         }
       />
     </FormShell>
@@ -1438,11 +1605,10 @@ function AwardForm({
           setDraft({ ...draft, awardingOrganization: event.target.value })
         }
       />
-      <Input
+      <DateInput
         label="발급일"
-        type="date"
         value={draft.awardDate}
-        onChange={(event) => setDraft({ ...draft, awardDate: event.target.value })}
+        onChange={(awardDate) => setDraft({ ...draft, awardDate: awardDate ?? '' })}
       />
       <Textarea
         label="내용"

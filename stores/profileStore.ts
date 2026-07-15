@@ -34,9 +34,9 @@ interface ProfileStore {
   saveStatuses: Record<string, ProfileSaveStatus>;
   loadProfile: () => void;
   updatePersonalInfoDraft: (input: UpdatePersonalInfoInput) => void;
-  savePersonalInfo: () => void;
+  savePersonalInfo: () => boolean;
   updateOtherInfoDraft: (input: UpdateOtherInfoInput) => void;
-  saveOtherInfo: () => void;
+  saveOtherInfo: () => boolean;
   addHighSchool: (input: CreateHighSchoolInput) => void;
   updateHighSchool: (id: EntityId, input: UpdateHighSchoolInput) => void;
   deleteHighSchool: (id: EntityId) => void;
@@ -142,7 +142,7 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     const profile = get().profile;
 
     if (!profile) {
-      return;
+      return false;
     }
 
     setStatus(set, key, {
@@ -165,12 +165,14 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
           },
         },
       }));
+      return true;
     } catch {
       setStatus(set, key, {
         ...defaultSaveStatus,
         ...get().saveStatuses[key],
         state: 'error',
       });
+      return false;
     }
   },
   updateOtherInfoDraft: (input) => {
@@ -209,7 +211,7 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     const profile = get().profile;
 
     if (!profile) {
-      return;
+      return false;
     }
 
     setStatus(set, key, {
@@ -230,12 +232,14 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
           },
         },
       }));
+      return true;
     } catch {
       setStatus(set, key, {
         ...defaultSaveStatus,
         ...get().saveStatuses[key],
         state: 'error',
       });
+      return false;
     }
   },
   addHighSchool: (input) => {

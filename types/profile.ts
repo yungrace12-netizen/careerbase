@@ -7,6 +7,8 @@ export interface PersonalInfo {
   englishAddress: string;
   profilePhotoFileName: string;
   profilePhotoLocation: string;
+  profilePhotoDataUrl?: string;
+  profilePhotoMimeType?: string;
   desiredSalary: number | null;
   salaryCurrency: 'KRW';
   updatedAt: string;
