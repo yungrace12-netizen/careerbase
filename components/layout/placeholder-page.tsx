@@ -24,7 +24,7 @@ function PlaceholderPage({ title, description }: PlaceholderPageProps) {
             </CardHeader>
             <CardContent>
               <Typography variant="body" tone="secondary">
-                Sprint 2에서는 레이아웃과 네비게이션 뼈대만 제공합니다.
+                현재 버전에서는 관련 기능 화면에서 데이터를 관리합니다.
               </Typography>
             </CardContent>
           </Card>
