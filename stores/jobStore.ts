@@ -1,13 +1,29 @@
 import { create } from 'zustand';
 
 import { jobRepository } from '@/repositories/jobRepository';
-import type { CreateJobInput, EntityId, Job, UpdateJobInput } from '@/types/job';
+import type {
+  ApplicationBoardColumn,
+  ApplicationResult,
+  ApplicationStatus,
+  CreateJobInput,
+  EntityId,
+  Job,
+  UpdateJobInput,
+} from '@/types/job';
 
 interface JobStore {
   jobs: Job[];
   loadJobs: () => void;
   createJob: (input: CreateJobInput) => void;
   updateJob: (id: EntityId, input: UpdateJobInput) => void;
+  updateApplicationStatus: (
+    id: EntityId,
+    input: {
+      boardColumn: ApplicationBoardColumn;
+      detailedStatus: ApplicationStatus;
+      applicationResult: ApplicationResult;
+    },
+  ) => void;
   archiveJob: (id: EntityId) => void;
   restoreJob: (id: EntityId) => void;
   permanentlyDeleteJob: (id: EntityId) => void;
@@ -24,6 +40,10 @@ export const useJobStore = create<JobStore>((set) => ({
   },
   updateJob: (id, input) => {
     jobRepository.updateJob(id, input);
+    set({ jobs: jobRepository.getJobs() });
+  },
+  updateApplicationStatus: (id, input) => {
+    jobRepository.updateApplicationStatus(id, input);
     set({ jobs: jobRepository.getJobs() });
   },
   archiveJob: (id) => {

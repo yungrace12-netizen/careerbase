@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Archive, Pencil } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -44,40 +45,45 @@ function JobsList({ jobs, onCreate, onEdit, onArchive }: JobsListProps) {
             {jobs.map((job) => (
               <article
                 key={job.id}
-                className="rounded-[var(--radius-card)] border border-border bg-background p-4"
+                className="rounded-[var(--radius-card)] border border-border bg-background p-4 transition-colors hover:bg-muted"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <Typography variant="small" className="font-semibold">
-                      {job.companyName}
-                    </Typography>
+                <Link
+                  href={`/jobs/${job.id}`}
+                  className="block rounded-[var(--radius-button)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <Typography variant="small" className="font-semibold">
+                        {job.companyName}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        tone="secondary"
+                        className="mt-1 block"
+                      >
+                        {job.postingTitle}
+                      </Typography>
+                    </div>
                     <Typography
                       variant="caption"
-                      tone="secondary"
-                      className="mt-1 block"
+                      className="shrink-0 font-medium text-primary"
                     >
-                      {job.postingTitle}
+                      {getDday(job.applicationEndDate)}
                     </Typography>
                   </div>
-                  <Typography
-                    variant="caption"
-                    className="shrink-0 font-medium text-primary"
-                  >
-                    {getDday(job.applicationEndDate)}
-                  </Typography>
-                </div>
 
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <Badge variant={statusVariant[job.boardColumn]}>
-                    {job.boardColumn}
-                  </Badge>
-                  <Typography variant="caption" tone="secondary">
-                    {job.position}
-                  </Typography>
-                  <Typography variant="caption" tone="secondary">
-                    마감 {job.applicationEndDate ?? '미정'}
-                  </Typography>
-                </div>
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <Badge variant={statusVariant[job.boardColumn]}>
+                      {job.boardColumn}
+                    </Badge>
+                    <Typography variant="caption" tone="secondary">
+                      {job.position}
+                    </Typography>
+                    <Typography variant="caption" tone="secondary">
+                      마감 {job.applicationEndDate ?? '미정'}
+                    </Typography>
+                  </div>
+                </Link>
 
                 <div className="mt-4 flex justify-end gap-2">
                   <Button

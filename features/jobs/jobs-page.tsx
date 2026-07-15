@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Modal } from '@/components/ui/modal';
+import { Toast, ToastViewport } from '@/components/ui/toast';
 import { Typography } from '@/components/ui/typography';
 import {
   Container,
@@ -34,10 +35,24 @@ function JobsPage() {
   const [formOpen, setFormOpen] = React.useState(false);
   const [editingJob, setEditingJob] = React.useState<Job | null>(null);
   const [archiveTarget, setArchiveTarget] = React.useState<Job | null>(null);
+  const [archiveToastOpen, setArchiveToastOpen] = React.useState(false);
 
   React.useEffect(() => {
     loadJobs();
   }, [loadJobs]);
+
+  React.useEffect(() => {
+    if (window.location.hash !== '#archived') {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setArchiveToastOpen(true);
+    }, 0);
+    window.history.replaceState(null, '', '/jobs');
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   const openCreateModal = () => {
     setEditingJob(null);
@@ -92,12 +107,12 @@ function JobsPage() {
             <Card className="hidden lg:flex">
               <CardHeader>
                 <CardTitle>공고 상세</CardTitle>
-                <CardDescription>상세 화면은 다음 Sprint에서 구현합니다.</CardDescription>
+                <CardDescription>목록에서 공고를 선택하면 상세 화면으로 이동합니다.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex min-h-80 items-center justify-center rounded-[var(--radius-card)] border border-border bg-background p-6 text-center">
                   <Typography variant="body" tone="secondary">
-                    왼쪽 목록에서 공고를 관리할 수 있습니다.
+                    왼쪽 목록에서 공고를 선택해주세요.
                   </Typography>
                 </div>
               </CardContent>
@@ -126,6 +141,17 @@ function JobsPage() {
       >
         <Typography variant="body">이 공고를 Archive로 이동할까요?</Typography>
       </Modal>
+
+      {archiveToastOpen ? (
+        <ToastViewport>
+          <Toast
+            variant="success"
+            title="Archive로 이동했습니다."
+            description="공고 목록에서 제외되었습니다."
+            onClose={() => setArchiveToastOpen(false)}
+          />
+        </ToastViewport>
+      ) : null}
     </PageWrapper>
   );
 }
