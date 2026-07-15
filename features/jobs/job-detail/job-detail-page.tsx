@@ -60,8 +60,8 @@ const statusVariant: Record<
 
 function JobDetailPage({ jobId }: JobDetailPageProps) {
   const router = useRouter();
-  const jobs = useJobStore((state) => state.jobs);
-  const loadJobs = useJobStore((state) => state.loadJobs);
+  const allJobs = useJobStore((state) => state.allJobs);
+  const loadAllJobs = useJobStore((state) => state.loadAllJobs);
   const updateJob = useJobStore((state) => state.updateJob);
   const updateApplicationStatus = useJobStore(
     (state) => state.updateApplicationStatus,
@@ -74,16 +74,16 @@ function JobDetailPage({ jobId }: JobDetailPageProps) {
   const [archiveOpen, setArchiveOpen] = React.useState(false);
 
   React.useEffect(() => {
-    loadJobs();
+    loadAllJobs();
 
     const timeoutId = window.setTimeout(() => {
       setLoaded(true);
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [loadJobs]);
+  }, [loadAllJobs]);
 
-  const job = jobs.find((item) => item.id === jobId) ?? null;
+  const job = allJobs.find((item) => item.id === jobId) ?? null;
 
   const handleUpdate = (input: CreateJobInput) => {
     if (!job) {
@@ -210,16 +210,17 @@ function JobDetailHeader({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <Link
-            href="/jobs"
+            href={job.isArchived ? '/archive' : '/jobs'}
             className="mb-3 inline-flex items-center gap-2 text-[length:var(--text-small)] font-medium text-text-secondary transition-colors hover:text-text-primary"
           >
             <ArrowLeft className="size-4" aria-hidden />
-            Jobs
+            {job.isArchived ? 'Archive' : 'Jobs'}
           </Link>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={statusVariant[job.boardColumn]}>
               {job.boardColumn}
             </Badge>
+            {job.isArchived ? <Badge variant="archive">보관중</Badge> : null}
             <Typography variant="caption" className="font-medium text-primary">
               {getDday(job.applicationEndDate)}
             </Typography>
@@ -251,10 +252,12 @@ function JobDetailHeader({
             <Pencil className="size-4" aria-hidden />
             공고 수정
           </Button>
-          <Button type="button" variant="secondary" onClick={onArchive}>
-            <Archive className="size-4" aria-hidden />
-            Archive 이동
-          </Button>
+          {!job.isArchived ? (
+            <Button type="button" variant="secondary" onClick={onArchive}>
+              <Archive className="size-4" aria-hidden />
+              Archive 이동
+            </Button>
+          ) : null}
         </div>
       </div>
     </Card>
@@ -367,7 +370,7 @@ function JobDetailNotFound() {
       <Container>
         <EmptyState
           title="공고를 찾을 수 없습니다."
-          description="존재하지 않거나 Archive로 이동된 공고입니다."
+          description="존재하지 않는 공고입니다."
           action={
             <Link href="/jobs" className={cn(buttonVariants())}>
               Jobs로 돌아가기

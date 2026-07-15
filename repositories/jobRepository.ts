@@ -33,6 +33,10 @@ function getJobs(): Job[] {
   );
 }
 
+function getAllJobs(): Job[] {
+  return sortJobsByDeadline(readData().jobs);
+}
+
 function getJob(id: EntityId): Job | null {
   return readData().jobs.find((job) => job.id === id) ?? null;
 }
@@ -205,10 +209,44 @@ function restoreJob(id: EntityId): Job | null {
 function permanentlyDeleteJob(id: EntityId): void {
   const data = readData();
   const now = new Date().toISOString();
+  const deletedEssayIds = new Set(
+    data.essays.filter((essay) => essay.jobId === id).map((essay) => essay.id),
+  );
+  const withoutJobReferences = <T>(items: T[]) =>
+    items.filter((item) => {
+      if (!item || typeof item !== 'object') {
+        return true;
+      }
+
+      return (item as { jobId?: EntityId | null }).jobId !== id;
+    });
 
   writeData({
     ...data,
     jobs: data.jobs.filter((job) => job.id !== id),
+    essays: data.essays.filter((essay) => essay.jobId !== id),
+    interviews: data.interviews.filter((stage) => stage.jobId !== id),
+    experiences: data.experiences.map((experience) => ({
+      ...experience,
+      relatedJobIds: experience.relatedJobIds.filter((jobId) => jobId !== id),
+      updatedAt: experience.relatedJobIds.includes(id)
+        ? now
+        : experience.updatedAt,
+    })),
+    attachments: data.attachments.filter(
+      (attachment) =>
+        attachment.jobId !== id &&
+        (!attachment.essayId || !deletedEssayIds.has(attachment.essayId)),
+    ),
+    schedules: withoutJobReferences(
+      data.schedules as unknown as Array<Record<string, unknown>>,
+    ) as typeof data.schedules,
+    todos: withoutJobReferences(
+      data.todos as unknown as Array<Record<string, unknown>>,
+    ) as typeof data.todos,
+    notes: withoutJobReferences(
+      data.notes as unknown as Array<Record<string, unknown>>,
+    ) as typeof data.notes,
     lastUpdatedAt: now,
   });
 }
@@ -221,6 +259,7 @@ export const jobRepository = {
   restoreJob,
   permanentlyDeleteJob,
   getJob,
+  getAllJobs,
   getJobs,
 };
 

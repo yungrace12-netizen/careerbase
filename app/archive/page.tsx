@@ -1,10 +1,5 @@
-import { PlaceholderPage } from '@/components/layout';
+import { ArchivePage as ArchiveFeaturePage } from '@/features/archive';
 
 export default function ArchivePage() {
-  return (
-    <PlaceholderPage
-      title="Archive"
-      description="보관된 공고 화면의 placeholder입니다."
-    />
-  );
+  return <ArchiveFeaturePage />;
 }
