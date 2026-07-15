@@ -27,6 +27,7 @@ import { useJobStore } from '@/stores/jobStore';
 import type { ApplicationBoardColumn, CreateJobInput, Job } from '@/types/job';
 import { JobFormModal } from '../job-form-modal';
 import { ApplicationsTab } from './applications-tab';
+import { EssayTab } from './essay-tab';
 
 interface JobDetailPageProps {
   jobId: string;
@@ -152,6 +153,8 @@ function JobDetailPage({ jobId }: JobDetailPageProps) {
             <div className="min-h-0 flex-1 overflow-y-auto pr-1">
               {activeTab === 'info' ? (
                 <JobInfoTab job={job} />
+              ) : activeTab === 'essay' ? (
+                <EssayTab job={job} />
               ) : activeTab === 'application' ? (
                 <ApplicationsTab
                   job={job}
@@ -349,7 +352,7 @@ function JobDetailTabPlaceholder({ title }: { title: string }) {
     <Card>
       <EmptyState
         title={`${title} 탭은 아직 준비 중입니다.`}
-        description="이번 Sprint에서는 공고정보 탭만 제공합니다."
+        description="이번 Sprint 범위에 포함되지 않은 기능입니다."
       />
     </Card>
   );

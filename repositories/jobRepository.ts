@@ -1,4 +1,4 @@
-import type { CareerBaseData } from '@/types/careerbase-data';
+import { readData, STORAGE_KEY, writeData } from '@/repositories/careerbaseStorage';
 import type {
   ApplicationBoardColumn,
   ApplicationResult,
@@ -8,102 +8,6 @@ import type {
   Job,
   UpdateJobInput,
 } from '@/types/job';
-
-const STORAGE_KEY = 'careerbase_data';
-const SCHEMA_VERSION = '1.0.0';
-
-function createInitialData(now = new Date().toISOString()): CareerBaseData {
-  return {
-    schemaVersion: SCHEMA_VERSION,
-    initializedAt: now,
-    lastUpdatedAt: now,
-    onboarding: {
-      isCompleted: false,
-      selectedMode: null,
-      completedAt: null,
-    },
-    jobs: [],
-    schedules: [],
-    essays: [],
-    interviews: [],
-    profile: {
-      personalInfo: {
-        name: '',
-        birthDate: null,
-        address: '',
-        englishAddress: '',
-        profilePhotoFileName: '',
-        profilePhotoLocation: '',
-        desiredSalary: null,
-        salaryCurrency: 'KRW',
-        updatedAt: now,
-      },
-      highSchools: [],
-      universities: [],
-      careers: [],
-      languages: [],
-      certificates: [],
-      awards: [],
-      activities: [],
-      otherInfo: {
-        hobby: '',
-        specialty: '',
-        updatedAt: now,
-      },
-      updatedAt: now,
-    },
-    experiences: [],
-    todos: [],
-    notes: [],
-    attachments: [],
-    settings: {
-      theme: 'light',
-      sidebarCollapsed: false,
-      autoSaveDelayMs: 1000,
-      automaticTodoDaysBeforeDeadline: 3,
-      lastBackupAt: null,
-      updatedAt: now,
-    },
-  };
-}
-
-function readData(): CareerBaseData {
-  if (typeof window === 'undefined') {
-    return createInitialData();
-  }
-
-  const rawData = window.localStorage.getItem(STORAGE_KEY);
-
-  if (!rawData) {
-    const initialData = createInitialData();
-    writeData(initialData);
-    return initialData;
-  }
-
-  try {
-    const parsedData = JSON.parse(rawData) as CareerBaseData;
-
-    if (!Array.isArray(parsedData.jobs)) {
-      const initialData = createInitialData();
-      writeData(initialData);
-      return initialData;
-    }
-
-    return parsedData;
-  } catch {
-    const initialData = createInitialData();
-    writeData(initialData);
-    return initialData;
-  }
-}
-
-function writeData(data: CareerBaseData) {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
 
 function sortJobsByDeadline(jobs: Job[]) {
   return [...jobs].sort((a, b) => {
@@ -149,7 +53,7 @@ function createJob(input: CreateJobInput): Job {
     updatedAt: now,
   };
 
-  const nextData: CareerBaseData = {
+  const nextData = {
     ...data,
     jobs: [...data.jobs, job],
     lastUpdatedAt: now,

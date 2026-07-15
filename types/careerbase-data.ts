@@ -1,4 +1,9 @@
 import type { Job } from '@/types/job';
+import type {
+  AttachmentMetadata,
+  Essay,
+  Experience,
+} from '@/types/essay';
 
 export interface OnboardingData {
   isCompleted: boolean;
@@ -54,12 +59,12 @@ export interface CareerBaseData {
   onboarding: OnboardingData;
   jobs: Job[];
   schedules: [];
-  essays: [];
+  essays: Essay[];
   interviews: [];
   profile: Profile;
-  experiences: [];
+  experiences: Experience[];
   todos: [];
   notes: [];
-  attachments: [];
+  attachments: AttachmentMetadata[];
   settings: AppSettings;
 }
