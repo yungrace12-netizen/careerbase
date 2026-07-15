@@ -6,7 +6,6 @@ import { Plus, Save, Trash2, X } from 'lucide-react';
 import {
   Container,
   ContentWrapper,
-  PageHeader,
   PageWrapper,
 } from '@/components/layout';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +20,7 @@ import {
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
+import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Typography } from '@/components/ui/typography';
 import {
@@ -128,15 +128,15 @@ function ExperiencePage() {
     <PageWrapper className="lg:h-[calc(100dvh-4rem)] lg:overflow-hidden">
       <Container className="lg:h-full">
         <ContentWrapper className="lg:h-full lg:overflow-hidden">
-          <PageHeader
-            title="Experience Library"
-            description="프로젝트, 업무, 활동 경험을 STAR 구조로 기록하고 자소서와 면접에서 연결합니다."
-          >
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <Typography variant="body" tone="secondary">
+              프로젝트, 업무, 활동 경험을 STAR 구조로 기록하고 자소서와 면접에서 연결합니다.
+            </Typography>
             <Button type="button" onClick={openCreateEditor}>
               <Plus className="size-5" aria-hidden />
               경험 추가
             </Button>
-          </PageHeader>
+          </div>
 
           <section className="grid min-h-0 flex-1 gap-4 lg:overflow-hidden">
             <Card className="shrink-0">
@@ -199,20 +199,11 @@ function ExperiencePage() {
                     </div>
                   </div>
 
-                  <div className="grid gap-2">
-                    <Typography
-                      as="label"
-                      htmlFor="experience-job-filter"
-                      variant="small"
-                      className="font-medium"
-                    >
-                      관련 공고
-                    </Typography>
-                    <select
+                  <Select
+                      label="관련 공고"
                       id="experience-job-filter"
                       value={selectedJobId}
                       onChange={(event) => setJobFilter(event.target.value)}
-                      className="h-[var(--input-height)] rounded-[var(--radius-input)] border border-border bg-surface px-4 text-body text-text-primary outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/30"
                     >
                       <option value="">전체 공고</option>
                       {jobs.map((job) => (
@@ -221,8 +212,7 @@ function ExperiencePage() {
                           {job.isArchived ? ' (Archive)' : ''}
                         </option>
                       ))}
-                    </select>
-                  </div>
+                    </Select>
                 </div>
 
                 {hasActiveFilter ? (

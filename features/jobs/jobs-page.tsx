@@ -1,9 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Plus } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -17,7 +15,6 @@ import { Typography } from '@/components/ui/typography';
 import {
   Container,
   ContentWrapper,
-  PageHeader,
   PageWrapper,
 } from '@/components/layout';
 import { useJobStore } from '@/stores/jobStore';
@@ -28,7 +25,6 @@ import { JobsList } from './jobs-list';
 function JobsPage() {
   const jobs = useJobStore((state) => state.jobs);
   const loadJobs = useJobStore((state) => state.loadJobs);
-  const createJob = useJobStore((state) => state.createJob);
   const updateJob = useJobStore((state) => state.updateJob);
   const archiveJob = useJobStore((state) => state.archiveJob);
 
@@ -54,11 +50,6 @@ function JobsPage() {
     return () => window.clearTimeout(timeoutId);
   }, []);
 
-  const openCreateModal = () => {
-    setEditingJob(null);
-    setFormOpen(true);
-  };
-
   const openEditModal = (job: Job) => {
     setEditingJob(job);
     setFormOpen(true);
@@ -67,10 +58,7 @@ function JobsPage() {
   const handleSubmit = (input: CreateJobInput) => {
     if (editingJob) {
       updateJob(editingJob.id, input);
-      return;
     }
-
-    createJob(input);
   };
 
   const handleArchive = () => {
@@ -86,20 +74,9 @@ function JobsPage() {
     <PageWrapper>
       <Container>
         <ContentWrapper>
-          <PageHeader
-            title="Jobs"
-            description="채용공고를 등록하고 지원 준비를 시작합니다."
-          >
-            <Button type="button" onClick={openCreateModal}>
-              <Plus className="size-5" aria-hidden />
-              새 공고 등록
-            </Button>
-          </PageHeader>
-
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
             <JobsList
               jobs={jobs}
-              onCreate={openCreateModal}
               onEdit={openEditModal}
               onArchive={setArchiveTarget}
             />

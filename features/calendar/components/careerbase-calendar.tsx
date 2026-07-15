@@ -91,7 +91,7 @@ function CareerBaseCalendar({
       return (
         <div
           className={cn(
-            'flex min-w-0 items-center gap-1 rounded-[var(--radius-badge)] px-2 py-0.5',
+            'flex min-w-0 items-center gap-1 overflow-hidden rounded-[var(--radius-badge)] px-2 py-0.5',
             schedule.isDanger
               ? 'bg-danger/10 text-danger'
               : 'bg-primary/10 text-primary',
@@ -103,7 +103,7 @@ function CareerBaseCalendar({
           <span className="shrink-0 text-[length:var(--text-caption)]">
             ·
           </span>
-          <span className="text-[length:var(--text-caption)] font-medium">
+          <span className="min-w-0 truncate text-[length:var(--text-caption)] font-medium">
             {schedule.type} - {schedule.companyName}
           </span>
         </div>
@@ -137,7 +137,7 @@ function CareerBaseCalendar({
         eventClick={handleEventClick}
         dateClick={handleDateClick}
         datesSet={handleDatesSet}
-        height={fullHeight ? '100%' : compact ? 520 : 'auto'}
+        height={compact ? 520 : 'auto'}
         dayMaxEvents={compact ? 2 : 3}
         moreLinkClick={(arg) => {
           onMoreLinkClick?.(formatCalendarDate(arg.date));

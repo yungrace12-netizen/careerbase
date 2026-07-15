@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Select } from '@/components/ui/select';
 import { Typography } from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
 import type {
@@ -164,30 +165,22 @@ function ApplicationsTab({ job, onStatusChange }: ApplicationsTabProps) {
             <SummaryItem label="지원 결과" value={summary.result} />
           </div>
 
-          <div className="mt-4 grid gap-2">
-            <Typography
-              as="label"
-              variant="small"
-              className="font-medium"
-              htmlFor="application-status"
-            >
-              지원 상태 변경
-            </Typography>
-            <select
+          <div className="mt-4">
+            <Select
+              label="지원 상태 변경"
               id="application-status"
               value={selectedOption}
               onChange={(event) => {
                 const nextStatus = event.target.value as ApplicationStatusOption;
                 onStatusChange(optionToStatus[nextStatus]);
               }}
-              className="h-[var(--input-height)] rounded-[var(--radius-input)] border border-border bg-surface px-4 text-body text-text-primary outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/30"
             >
               {statusOptions.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </CardContent>
       </Card>

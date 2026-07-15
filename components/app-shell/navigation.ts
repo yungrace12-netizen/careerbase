@@ -3,12 +3,10 @@ import {
   BookOpenText,
   BriefcaseBusiness,
   CalendarDays,
-  FileStack,
   LucideIcon,
   Search,
   Settings,
   UserRound,
-  UsersRound,
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -32,16 +30,6 @@ export const desktopNavigationItems: NavigationItem[] = [
     label: 'Jobs',
     href: '/jobs',
     icon: BriefcaseBusiness,
-  },
-  {
-    label: 'Applications',
-    href: '/applications',
-    icon: FileStack,
-  },
-  {
-    label: 'Interview',
-    href: '/interview',
-    icon: UsersRound,
   },
   {
     label: 'Experience',
@@ -88,16 +76,6 @@ export const mobileMoreNavigationItems: NavigationItem[] = [
     label: 'Search',
     href: '/search',
     icon: Search,
-  },
-  {
-    label: 'Applications',
-    href: '/applications',
-    icon: FileStack,
-  },
-  {
-    label: 'Interview',
-    href: '/interview',
-    icon: UsersRound,
   },
   {
     label: 'Experience',

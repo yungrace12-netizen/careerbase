@@ -15,6 +15,7 @@ import {
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
+import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Typography } from '@/components/ui/typography';
 import { useEssayStore, type EssaySaveStatus } from '@/stores/essayStore';
@@ -558,16 +559,8 @@ function AttachmentModal({
           value={state?.fileName ?? ''}
           onChange={(event) => updateAttachmentModalField(state, onStateChange, 'fileName', event.target.value)}
         />
-        <div className="grid gap-2">
-          <Typography
-            as="label"
-            variant="small"
-            className="font-medium"
-            htmlFor="attachment-type"
-          >
-            파일 종류
-          </Typography>
-          <select
+        <Select
+          label="파일 종류"
             id="attachment-type"
             value={state?.fileType ?? '자소서'}
             onChange={(event) =>
@@ -578,15 +571,13 @@ function AttachmentModal({
                 event.target.value as AttachmentType,
               )
             }
-            className="h-[var(--input-height)] rounded-[var(--radius-input)] border border-border bg-surface px-4 text-body text-text-primary outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/30"
           >
             {ATTACHMENT_TYPES.map((type) => (
               <option key={type} value={type}>
                 {type}
               </option>
             ))}
-          </select>
-        </div>
+        </Select>
         <Input
           label="버전 또는 설명"
           value={state?.versionDescription ?? ''}

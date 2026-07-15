@@ -1,10 +1,5 @@
-import { PlaceholderPage } from '@/components/layout';
+import { redirect } from 'next/navigation';
 
 export default function InterviewPage() {
-  return (
-    <PlaceholderPage
-      title="Interview"
-      description="면접 준비와 완료 기록은 Job Detail의 면접 탭에서 관리합니다."
-    />
-  );
+  redirect('/jobs');
 }

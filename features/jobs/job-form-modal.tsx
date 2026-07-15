@@ -8,9 +8,8 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
+import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Typography } from '@/components/ui/typography';
-import { cn } from '@/lib/utils';
 import {
   APPLICANT_TYPES,
   EMPLOYMENT_TYPES,
@@ -141,7 +140,7 @@ function JobFormModal({ open, job, onOpenChange, onSubmit }: JobFormModalProps) 
             {...form.register('position')}
             error={form.formState.errors.position?.message}
           />
-          <FormSelect
+          <Select
             label="고용형태"
             {...form.register('employmentType')}
             error={form.formState.errors.employmentType?.message}
@@ -152,8 +151,8 @@ function JobFormModal({ open, job, onOpenChange, onSubmit }: JobFormModalProps) 
                 {type}
               </option>
             ))}
-          </FormSelect>
-          <FormSelect
+          </Select>
+          <Select
             label="신입/경력"
             {...form.register('applicantType')}
             error={form.formState.errors.applicantType?.message}
@@ -164,7 +163,7 @@ function JobFormModal({ open, job, onOpenChange, onSubmit }: JobFormModalProps) 
                 {type}
               </option>
             ))}
-          </FormSelect>
+          </Select>
           <Input
             label="공고 URL"
             {...form.register('postingUrl')}
@@ -215,52 +214,6 @@ function JobFormModal({ open, job, onOpenChange, onSubmit }: JobFormModalProps) 
     </Modal>
   );
 }
-
-interface FormSelectProps extends React.ComponentProps<'select'> {
-  label: string;
-  error?: string;
-}
-
-const FormSelect = React.forwardRef<HTMLSelectElement, FormSelectProps>(
-  ({ className, label, error, id, children, ...props }, ref) => {
-    const generatedId = React.useId();
-    const selectId = id ?? generatedId;
-
-    return (
-      <div className="flex w-full flex-col gap-2">
-        <Typography
-          as="label"
-          variant="small"
-          className="font-medium"
-          htmlFor={selectId}
-        >
-          {label}
-        </Typography>
-        <select
-          ref={ref}
-          id={selectId}
-          aria-invalid={Boolean(error) || undefined}
-          className={cn(
-            'h-[var(--input-height)] w-full rounded-[var(--radius-input)] border border-border bg-surface px-4 text-body text-text-primary outline-none transition-colors duration-[var(--duration-fast)] focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/30',
-            error &&
-              'border-danger focus-visible:border-danger focus-visible:ring-danger/30',
-            className,
-          )}
-          {...props}
-        >
-          {children}
-        </select>
-        {error ? (
-          <Typography variant="caption" className="text-danger">
-            {error}
-          </Typography>
-        ) : null}
-      </div>
-    );
-  },
-);
-
-FormSelect.displayName = 'FormSelect';
 
 function jobToFormValues(job: Job): JobFormValues {
   return {

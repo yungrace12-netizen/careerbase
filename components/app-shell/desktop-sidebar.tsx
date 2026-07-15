@@ -26,28 +26,28 @@ function DesktopSidebar({
     <aside
       className={cn(
         'hidden shrink-0 border-r border-border bg-surface transition-[width] duration-[var(--duration-normal)] md:flex',
-        collapsed ? 'w-16' : 'w-56',
+        collapsed ? 'w-16' : 'w-[200px]',
       )}
       aria-label="Primary navigation"
     >
       <div className="flex h-dvh w-full flex-col">
         <div
           className={cn(
-            'flex h-14 items-center border-b border-border px-3',
+            'flex h-14 items-center border-b border-border px-2',
             collapsed ? 'justify-center' : 'justify-between',
           )}
         >
           {!collapsed ? (
             <Link
               href="/"
-              className="flex min-w-0 items-center gap-2 rounded-[var(--radius-button)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              className="flex min-w-0 items-center gap-1.5 rounded-[var(--radius-button)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               aria-label="CareerBase Dashboard"
             >
               <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-primary text-primary-foreground">
                 C
               </span>
               <Typography variant="card-title" className="truncate">
-                CareerBase
+                Grace
               </Typography>
             </Link>
           ) : null}
@@ -68,7 +68,7 @@ function DesktopSidebar({
           </Button>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-1 px-2 py-4">
+        <nav className="flex flex-1 flex-col gap-1 px-1.5 py-4">
           {desktopNavigationItems.map((item) => {
             const active = isNavigationItemActive(pathname, item.href);
             const Icon = item.icon;
@@ -79,7 +79,7 @@ function DesktopSidebar({
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'group relative flex min-h-10 items-center gap-3 rounded-[var(--radius-button)] px-3 text-[length:var(--text-small)] font-medium transition-colors duration-[var(--duration-fast)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                  'group relative flex min-h-10 items-center gap-2 rounded-[var(--radius-button)] px-2.5 text-[length:var(--text-small)] font-medium transition-colors duration-[var(--duration-fast)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                   active
                     ? 'bg-primary/10 text-primary'
                     : 'text-text-secondary hover:bg-muted hover:text-text-primary',

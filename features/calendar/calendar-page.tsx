@@ -26,7 +26,7 @@ import { useCalendarStore } from '@/stores/calendarStore';
 const defaultSelectedDate = formatCalendarDate(new Date());
 
 const fullScreenCalendarClassName = [
-  'h-[620px] overflow-hidden',
+  'min-h-[720px] overflow-visible sm:min-h-[760px]',
   'xl:h-full xl:min-h-0',
   'xl:[&_.careerbase-calendar]:flex xl:[&_.careerbase-calendar]:h-full',
   'xl:[&_.careerbase-calendar]:min-h-0 xl:[&_.careerbase-calendar]:overflow-hidden',
@@ -89,7 +89,7 @@ function CalendarPage() {
     <PageWrapper className="py-4 xl:h-[calc(100dvh-4rem)] xl:overflow-hidden xl:py-3">
       <Container className="xl:h-full xl:max-w-none xl:px-4">
         <ContentWrapper className="xl:h-full xl:overflow-hidden">
-          <div className="min-h-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-3 xl:h-full">
+          <div className="min-h-0 overflow-visible rounded-[var(--radius-card)] border border-border bg-surface p-3 xl:h-full xl:overflow-hidden">
             <div className={fullScreenCalendarClassName}>
               <CareerBaseCalendar
                 schedules={calendarSchedules}

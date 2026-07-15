@@ -7,7 +7,6 @@ import { RotateCcw, Trash2 } from 'lucide-react';
 import {
   Container,
   ContentWrapper,
-  PageHeader,
   PageWrapper,
 } from '@/components/layout';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +21,7 @@ import {
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
+import { Select } from '@/components/ui/select';
 import { Typography } from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
 import {
@@ -98,10 +98,9 @@ function ArchivePage() {
     <PageWrapper>
       <Container>
         <ContentWrapper>
-          <PageHeader
-            title="Archive"
-            description="삭제 목록이 아니라 취업 준비가 끝난 공고와 기록을 보관하는 공간입니다."
-          />
+          <Typography variant="body" tone="secondary">
+            삭제 목록이 아니라 취업 준비가 끝난 공고와 기록을 보관하는 공간입니다.
+          </Typography>
 
           <ArchiveStatsCards stats={stats} />
 
@@ -114,26 +113,33 @@ function ArchivePage() {
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="기업명, 공고명, 직무를 검색하세요."
                 />
-                <SelectField
+                <Select
                   id="archive-year-filter"
                   label="연도"
                   value={filters.year}
-                  onChange={setYearFilter}
-                  options={[
-                    { label: '전체', value: '' },
-                    ...years.map((year) => ({ label: year, value: year })),
-                  ]}
-                />
-                <SelectField
+                  onChange={(event) => setYearFilter(event.target.value)}
+                >
+                  <option value="">전체</option>
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </Select>
+                <Select
                   id="archive-status-filter"
                   label="상태"
                   value={filters.status}
-                  onChange={(value) => setStatusFilter(value as ArchiveStatusFilter)}
-                  options={statusOptions.map((status) => ({
-                    label: status,
-                    value: status,
-                  }))}
-                />
+                  onChange={(event) =>
+                    setStatusFilter(event.target.value as ArchiveStatusFilter)
+                  }
+                >
+                  {statusOptions.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </Select>
                 <Button
                   type="button"
                   variant="secondary"
@@ -294,40 +300,6 @@ function ArchiveStatsCards({ stats }: { stats: ReturnType<typeof useArchiveStore
         </Card>
       ))}
     </section>
-  );
-}
-
-function SelectField({
-  id,
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  options: Array<{ label: string; value: string }>;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="grid gap-2">
-      <Typography as="label" htmlFor={id} variant="small" className="font-medium">
-        {label}
-      </Typography>
-      <select
-        id={id}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-[var(--input-height)] rounded-[var(--radius-input)] border border-border bg-surface px-4 text-body text-text-primary outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/30"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </div>
   );
 }
 

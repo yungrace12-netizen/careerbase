@@ -8,7 +8,6 @@ import { Search } from 'lucide-react';
 import {
   Container,
   ContentWrapper,
-  PageHeader,
   PageWrapper,
 } from '@/components/layout';
 import { Badge } from '@/components/ui/badge';
@@ -124,10 +123,9 @@ function SearchPage({
     <PageWrapper>
       <Container>
         <ContentWrapper>
-          <PageHeader
-            title="Search"
-            description="CareerBase 전체 데이터를 빠르게 검색하고 해당 페이지로 이동합니다."
-          />
+          <Typography variant="body" tone="secondary">
+            CareerBase 전체 데이터를 빠르게 검색하고 해당 페이지로 이동합니다.
+          </Typography>
 
           <Card>
             <CardContent>

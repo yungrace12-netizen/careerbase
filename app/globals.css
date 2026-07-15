@@ -165,13 +165,14 @@
 
   .careerbase-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
     display: inline-flex;
-    width: 1.75rem;
+    min-width: 2.25rem;
     height: 1.75rem;
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-badge);
-    background: var(--danger);
-    color: var(--danger-foreground);
+    background: var(--primary);
+    color: var(--primary-foreground);
+    white-space: nowrap;
   }
 
   .careerbase-calendar .fc-daygrid-day-frame {
@@ -188,7 +189,61 @@
     padding: 0.125rem 0.25rem;
   }
 
+  .careerbase-calendar .fc-daygrid-event-harness {
+    margin-top: 0.125rem;
+  }
+
+  .careerbase-calendar .fc-event-main {
+    min-width: 0;
+  }
+
   .careerbase-calendar-selected-day {
     background: color-mix(in srgb, var(--primary) 8%, transparent);
+  }
+
+  @media (max-width: 767px) {
+    .careerbase-calendar .fc {
+      min-width: 0;
+    }
+
+    .careerbase-calendar .fc-toolbar {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .careerbase-calendar .fc-toolbar-title {
+      font-size: var(--text-card-title);
+    }
+
+    .careerbase-calendar .fc-view-harness,
+    .careerbase-calendar .fc-view-harness-active {
+      height: auto !important;
+      min-height: 36rem;
+    }
+
+    .careerbase-calendar .fc-daygrid-day-frame {
+      min-height: 5.75rem;
+      padding: 0.25rem;
+    }
+
+    .careerbase-calendar .fc-daygrid-day-top {
+      min-height: 1.875rem;
+    }
+
+    .careerbase-calendar .fc-daygrid-day-number {
+      white-space: nowrap;
+    }
+
+    .careerbase-calendar .fc-daygrid-event {
+      margin-top: 0.125rem;
+      padding: 0.0625rem 0.125rem;
+    }
+
+    .careerbase-calendar .fc-event-title,
+    .careerbase-calendar .fc-more-link {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 }

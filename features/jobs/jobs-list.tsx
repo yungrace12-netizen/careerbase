@@ -16,7 +16,6 @@ import type { ApplicationBoardColumn, Job } from '@/types/job';
 
 interface JobsListProps {
   jobs: Job[];
-  onCreate: () => void;
   onEdit: (job: Job) => void;
   onArchive: (job: Job) => void;
 }
@@ -32,7 +31,7 @@ const statusVariant: Record<
   '최종 결과': 'archive',
 };
 
-function JobsList({ jobs, onCreate, onEdit, onArchive }: JobsListProps) {
+function JobsList({ jobs, onEdit, onArchive }: JobsListProps) {
   return (
     <Card className="min-h-full">
       <CardHeader>
@@ -109,9 +108,7 @@ function JobsList({ jobs, onCreate, onEdit, onArchive }: JobsListProps) {
         ) : (
           <EmptyState
             title="아직 등록된 공고가 없습니다."
-            description="취업 준비를 시작하려면 첫 번째 공고를 등록해보세요."
-            actionLabel="새 공고 등록"
-            onAction={onCreate}
+            description="상단의 새 공고 등록 버튼으로 첫 번째 공고를 등록해보세요."
           />
         )}
       </CardContent>

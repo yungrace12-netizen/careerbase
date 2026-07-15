@@ -6,7 +6,6 @@ import { ChevronDown, Pencil, Plus, Save, Trash2 } from 'lucide-react';
 import {
   Container,
   ContentWrapper,
-  PageHeader,
   PageWrapper,
 } from '@/components/layout';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +20,7 @@ import {
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
+import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Typography } from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
@@ -209,10 +209,9 @@ function ProfilePage() {
     <PageWrapper>
       <Container className="max-w-5xl">
         <ContentWrapper>
-          <PageHeader
-            title="Profile"
-            description="공통 이력 정보를 관리합니다. 저장한 정보는 특정 공고에 종속되지 않습니다."
-          />
+          <Typography variant="body" tone="secondary">
+            공통 이력 정보를 관리합니다. 저장한 정보는 특정 공고에 종속되지 않습니다.
+          </Typography>
 
           <div className="flex flex-col gap-4">
             <AccordionSection
@@ -1488,30 +1487,20 @@ function ActivityForm({
       role: draft.role,
       description: draft.description,
     })}>
-      <div className="grid gap-2">
-        <Typography
-          as="label"
-          htmlFor="activity-type"
-          variant="small"
-          className="font-medium"
-        >
-          활동구분
-        </Typography>
-        <select
+      <Select
+          label="활동구분"
           id="activity-type"
           value={draft.activityType}
           onChange={(event) =>
             setDraft({ ...draft, activityType: event.target.value as ActivityType })
           }
-          className="h-[var(--input-height)] rounded-[var(--radius-input)] border border-border bg-surface px-4 text-body text-text-primary outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/30"
         >
           {ACTIVITY_TYPES.map((activityType) => (
             <option key={activityType} value={activityType}>
               {activityType}
             </option>
           ))}
-        </select>
-      </div>
+      </Select>
       <Input
         label="기관 및 조직명"
         value={draft.organizationName}

@@ -40,6 +40,7 @@ import {
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
+import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Typography } from '@/components/ui/typography';
 import {
@@ -656,12 +657,13 @@ function StageSummaryCard({
         </div>
 
         <div className="flex flex-wrap gap-2 lg:justify-end">
-          <select
+          <Select
             value={stage.status}
             onChange={(event) =>
               onStatusChange(event.target.value as InterviewStatus)
             }
-            className="h-[var(--input-height)] rounded-[var(--radius-input)] border border-border bg-surface px-4 text-body text-text-primary outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/30"
+            containerClassName="w-auto"
+            className="w-auto min-w-32"
             aria-label="면접 단계 상태"
           >
             {INTERVIEW_STATUSES.map((status) => (
@@ -669,7 +671,7 @@ function StageSummaryCard({
                 {status}
               </option>
             ))}
-          </select>
+          </Select>
           <Button
             type="button"
             variant="secondary"
@@ -1205,16 +1207,8 @@ function StageModal({
             state ? onStateChange({ ...state, order: event.target.value }) : null
           }
         />
-        <div className="grid gap-2">
-          <Typography
-            as="label"
-            variant="small"
-            className="font-medium"
-            htmlFor="interview-stage-status"
-          >
-            상태
-          </Typography>
-          <select
+        <Select
+          label="상태"
             id="interview-stage-status"
             value={state?.status ?? '준비 전'}
             onChange={(event) =>
@@ -1225,15 +1219,13 @@ function StageModal({
                   })
                 : null
             }
-            className="h-[var(--input-height)] rounded-[var(--radius-input)] border border-border bg-surface px-4 text-body text-text-primary outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/30"
           >
             {INTERVIEW_STATUSES.map((status) => (
               <option key={status} value={status}>
                 {status}
               </option>
             ))}
-          </select>
-        </div>
+        </Select>
       </div>
     </Modal>
   );
