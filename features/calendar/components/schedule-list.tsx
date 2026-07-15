@@ -37,8 +37,19 @@ function ScheduleList({
           className="rounded-[var(--radius-card)] border border-border bg-background p-4"
         >
           <div className="flex flex-wrap items-center gap-2">
-            <span className="size-2 rounded-[var(--radius-badge)] bg-primary" />
-            <Badge variant="primary">{schedule.type}</Badge>
+            <span
+              className={
+                schedule.isDanger
+                  ? 'size-2 rounded-[var(--radius-badge)] bg-danger'
+                  : 'size-2 rounded-[var(--radius-badge)] bg-primary'
+              }
+            />
+            <Badge variant={schedule.isDanger ? 'danger' : 'primary'}>
+              {schedule.type}
+            </Badge>
+            <Badge variant={schedule.isDanger ? 'danger' : 'primary'}>
+              {schedule.dDayLabel}
+            </Badge>
             {showDate ? (
               <Typography variant="caption" tone="secondary">
                 {schedule.date ?? schedule.approximateText ?? '미정'}
@@ -52,7 +63,7 @@ function ScheduleList({
           </div>
 
           <Typography variant="small" className="mt-3 font-semibold">
-            {schedule.companyName}
+            {schedule.type} - {schedule.companyName}
           </Typography>
           <Typography variant="caption" tone="secondary" className="mt-1 block">
             {schedule.postingTitle}

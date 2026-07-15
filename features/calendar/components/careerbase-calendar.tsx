@@ -5,7 +5,11 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import koLocale from '@fullcalendar/core/locales/ko';
-import type { EventClickArg, EventContentArg } from '@fullcalendar/core';
+import type {
+  DatesSetArg,
+  EventClickArg,
+  EventContentArg,
+} from '@fullcalendar/core';
 import type { EventInput } from '@fullcalendar/core';
 import type { DateClickArg } from '@fullcalendar/interaction';
 
@@ -22,6 +26,7 @@ interface CareerBaseCalendarProps {
   onDateClick?: (date: string) => void;
   onScheduleClick?: (schedule: CalendarSchedule) => void;
   onMoreLinkClick?: (date: string) => void;
+  onMonthChange?: (month: string) => void;
 }
 
 function CareerBaseCalendar({
@@ -32,6 +37,7 @@ function CareerBaseCalendar({
   onDateClick,
   onScheduleClick,
   onMoreLinkClick,
+  onMonthChange,
 }: CareerBaseCalendarProps) {
   const eventSchedules = React.useMemo(
     () => getExactSchedules(schedules),
@@ -42,7 +48,7 @@ function CareerBaseCalendar({
     () =>
       eventSchedules.map((schedule) => ({
         id: schedule.id,
-        title: `${schedule.type} · ${schedule.companyName}`,
+        title: `${schedule.type} - ${schedule.companyName}`,
         date: schedule.date ?? undefined,
         extendedProps: {
           schedule,
@@ -71,6 +77,13 @@ function CareerBaseCalendar({
     [onScheduleClick],
   );
 
+  const handleDatesSet = React.useCallback(
+    (arg: DatesSetArg) => {
+      onMonthChange?.(formatCalendarMonth(arg.view.currentStart));
+    },
+    [onMonthChange],
+  );
+
   const renderEventContent = React.useCallback(
     (arg: EventContentArg) => {
       const schedule = arg.event.extendedProps.schedule as CalendarSchedule;
@@ -79,30 +92,24 @@ function CareerBaseCalendar({
         <div
           className={cn(
             'flex min-w-0 items-center gap-1 rounded-[var(--radius-badge)] px-2 py-0.5',
-            schedule.type === '지원 마감'
+            schedule.isDanger
               ? 'bg-danger/10 text-danger'
               : 'bg-primary/10 text-primary',
           )}
         >
           <span className="shrink-0 text-[length:var(--text-caption)] font-semibold">
-            {schedule.type}
+            {schedule.dDayLabel}
           </span>
           <span className="shrink-0 text-[length:var(--text-caption)]">
-            -
+            ·
           </span>
-          {compact ? (
-            <span className="truncate text-[length:var(--text-caption)]">
-              {schedule.companyName}
-            </span>
-          ) : (
-            <span className="truncate text-[length:var(--text-caption)] font-medium">
-              {schedule.companyName}
-            </span>
-          )}
+          <span className="text-[length:var(--text-caption)] font-medium">
+            {schedule.type} - {schedule.companyName}
+          </span>
         </div>
       );
     },
-    [compact],
+    [],
   );
 
   return (
@@ -129,10 +136,16 @@ function CareerBaseCalendar({
         eventContent={renderEventContent}
         eventClick={handleEventClick}
         dateClick={handleDateClick}
+        datesSet={handleDatesSet}
         height={fullHeight ? '100%' : compact ? 520 : 'auto'}
         dayMaxEvents={compact ? 2 : 3}
         moreLinkClick={(arg) => {
           onMoreLinkClick?.(formatCalendarDate(arg.date));
+          window.setTimeout(() => {
+            document.querySelectorAll('.fc-popover').forEach((popover) => {
+              popover.remove();
+            });
+          }, 0);
         }}
         moreLinkContent={(arg) => `+${arg.num}개 더보기`}
         fixedWeekCount={fullHeight}
@@ -161,6 +174,13 @@ function formatCalendarDate(date: Date) {
   const day = String(date.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
+}
+
+function formatCalendarMonth(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+
+  return `${year}-${month}`;
 }
 
 export { CareerBaseCalendar };

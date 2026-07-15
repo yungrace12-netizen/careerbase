@@ -25,7 +25,7 @@ function ScheduleDetailModal({
       open={open}
       onOpenChange={onOpenChange}
       title="일정 상세"
-      description="Sprint 4에서는 조회용 Modal만 제공합니다."
+      description="Calendar는 원본 데이터를 읽어 표시합니다."
       confirmLabel="닫기"
     >
       <div className="grid gap-4">
@@ -36,7 +36,7 @@ function ScheduleDetailModal({
             일정 유형
           </Typography>
           <div>
-            <Badge variant={schedule.type === '지원 마감' ? 'danger' : 'primary'}>
+            <Badge variant={schedule.isDanger ? 'danger' : 'primary'}>
               {schedule.type}
             </Badge>
           </div>

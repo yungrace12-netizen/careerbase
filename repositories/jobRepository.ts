@@ -238,9 +238,7 @@ function permanentlyDeleteJob(id: EntityId): void {
         attachment.jobId !== id &&
         (!attachment.essayId || !deletedEssayIds.has(attachment.essayId)),
     ),
-    schedules: withoutJobReferences(
-      data.schedules as unknown as Array<Record<string, unknown>>,
-    ) as typeof data.schedules,
+    schedules: withoutJobReferences(data.schedules),
     todos: withoutJobReferences(
       data.todos as unknown as Array<Record<string, unknown>>,
     ) as typeof data.todos,

@@ -6,6 +6,7 @@ import type {
 } from '@/types/essay';
 import type { InterviewStage } from '@/types/interview';
 import type { Profile } from '@/types/profile';
+import type { Schedule } from '@/types/schedule';
 
 export interface OnboardingData {
   isCompleted: boolean;
@@ -29,7 +30,7 @@ export interface CareerBaseData {
 
   onboarding: OnboardingData;
   jobs: Job[];
-  schedules: [];
+  schedules: Schedule[];
   essays: Essay[];
   interviews: InterviewStage[];
   profile: Profile;

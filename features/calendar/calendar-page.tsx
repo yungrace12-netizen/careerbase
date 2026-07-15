@@ -1,23 +1,29 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import {
   Container,
   ContentWrapper,
   PageWrapper,
 } from '@/components/layout';
+import { Badge } from '@/components/ui/badge';
+import { buttonVariants } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Modal } from '@/components/ui/modal';
 import { Typography } from '@/components/ui/typography';
 import {
-  calendarSchedules,
+  getSchedulesByMonth,
   getSchedulesByDate,
   type CalendarSchedule,
 } from '@/features/calendar/calendar-data';
 import { CareerBaseCalendar } from '@/features/calendar/components/careerbase-calendar';
-import { ScheduleDetailModal } from '@/features/calendar/components/schedule-detail-modal';
+import { cn } from '@/lib/utils';
+import { useCalendarStore } from '@/stores/calendarStore';
 
-const defaultSelectedDate = '2026-07-14';
+const defaultSelectedDate = formatCalendarDate(new Date());
 
 const fullScreenCalendarClassName = [
   'h-[620px] overflow-hidden',
@@ -50,26 +56,33 @@ const fullScreenCalendarClassName = [
 ].join(' ');
 
 function CalendarPage() {
+  const router = useRouter();
+  const schedules = useCalendarStore((state) => state.schedules);
+  const loadSchedules = useCalendarStore((state) => state.loadSchedules);
   const [selectedDate, setSelectedDate] = React.useState(defaultSelectedDate);
-  const [selectedSchedule, setSelectedSchedule] =
-    React.useState<CalendarSchedule | null>(null);
-  const [modalOpen, setModalOpen] = React.useState(false);
+  const [visibleMonth, setVisibleMonth] = React.useState(
+    defaultSelectedDate.slice(0, 7),
+  );
   const [moreEventsDate, setMoreEventsDate] = React.useState<string | null>(
     null,
   );
 
+  React.useEffect(() => {
+    loadSchedules();
+  }, [loadSchedules]);
+
+  const calendarSchedules = schedules ?? [];
+  const loaded = schedules !== null;
   const moreEventsSchedules = moreEventsDate
     ? getSchedulesByDate(calendarSchedules, moreEventsDate)
     : [];
+  const visibleMonthSchedules = getSchedulesByMonth(
+    calendarSchedules,
+    visibleMonth,
+  );
 
   const handleScheduleClick = (schedule: CalendarSchedule) => {
-    setSelectedSchedule(schedule);
-    setModalOpen(true);
-  };
-
-  const handleMoreEventScheduleClick = (schedule: CalendarSchedule) => {
-    setMoreEventsDate(null);
-    handleScheduleClick(schedule);
+    router.push(`/jobs/${schedule.jobId}`);
   };
 
   return (
@@ -85,8 +98,21 @@ function CalendarPage() {
                 onDateClick={setSelectedDate}
                 onScheduleClick={handleScheduleClick}
                 onMoreLinkClick={setMoreEventsDate}
+                onMonthChange={setVisibleMonth}
               />
             </div>
+            {loaded && visibleMonthSchedules.length === 0 ? (
+              <EmptyState
+                title="아직 등록된 일정이 없습니다."
+                description="공고를 등록하면 일정이 자동으로 표시됩니다."
+                action={
+                  <Link href="/jobs" className={cn(buttonVariants())}>
+                    Jobs로 이동
+                  </Link>
+                }
+                className="py-8"
+              />
+            ) : null}
           </div>
         </ContentWrapper>
       </Container>
@@ -104,39 +130,44 @@ function CalendarPage() {
       >
         <div className="flex flex-col gap-2">
           {moreEventsSchedules.map((schedule) => (
-            <button
+            <Link
               key={schedule.id}
-              type="button"
               className="flex min-w-0 items-center gap-2 rounded-[var(--radius-card)] border border-border bg-background p-3 text-left transition-colors hover:bg-muted"
-              onClick={() => handleMoreEventScheduleClick(schedule)}
+              href={`/jobs/${schedule.jobId}`}
+              onClick={() => setMoreEventsDate(null)}
             >
+              <Badge variant={schedule.isDanger ? 'danger' : 'primary'}>
+                {schedule.dDayLabel}
+              </Badge>
               <Typography
                 as="span"
                 variant="small"
-                className={
-                  schedule.type === '지원 마감' ? 'text-danger' : 'text-primary'
-                }
+                className={schedule.isDanger ? 'text-danger' : 'text-primary'}
               >
-                {schedule.type}
+                {schedule.type} - {schedule.companyName}
               </Typography>
-              <Typography as="span" variant="small" tone="secondary">
-                -
+              <Typography as="span" variant="caption" tone="secondary">
+                {schedule.postingTitle}
               </Typography>
-              <Typography as="span" variant="small" className="truncate">
-                {schedule.companyName}
-              </Typography>
-            </button>
+            </Link>
           ))}
+          {moreEventsSchedules.length === 0 ? (
+            <Typography variant="body" tone="secondary">
+              해당 날짜에 표시할 일정이 없습니다.
+            </Typography>
+          ) : null}
         </div>
       </Modal>
-
-      <ScheduleDetailModal
-        schedule={selectedSchedule}
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-      />
     </PageWrapper>
   );
+}
+
+function formatCalendarDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 }
 
 export { CalendarPage };

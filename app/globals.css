@@ -170,8 +170,8 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-badge);
-    background: var(--primary);
-    color: var(--primary-foreground);
+    background: var(--danger);
+    color: var(--danger-foreground);
   }
 
   .careerbase-calendar .fc-daygrid-day-frame {
