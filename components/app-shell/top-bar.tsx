@@ -1,4 +1,5 @@
 import { Plus, Search } from 'lucide-react';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Typography } from '@/components/ui/typography';
@@ -18,16 +19,17 @@ function TopBar({ title }: TopBarProps) {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
-          <div
+          <Link
+            href="/search"
             className="flex h-[var(--input-height)] min-w-64 items-center gap-3 rounded-[var(--radius-input)] border border-border bg-background px-4 text-text-secondary"
             role="search"
-            aria-label="Global search placeholder"
+            aria-label="Global Search"
           >
             <Search className="size-5 shrink-0" aria-hidden />
             <span className="text-[length:var(--text-small)]">
               Global Search
             </span>
-          </div>
+          </Link>
 
           <Button type="button" aria-label="새 공고 등록">
             <Plus aria-hidden className="size-5" />

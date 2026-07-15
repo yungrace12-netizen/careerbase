@@ -32,6 +32,7 @@ import { InterviewTab } from './interview-tab';
 
 interface JobDetailPageProps {
   jobId: string;
+  initialTab?: JobDetailTab;
 }
 
 type JobDetailTab = 'info' | 'essay' | 'interview' | 'schedule' | 'application';
@@ -58,7 +59,7 @@ const statusVariant: Record<
   '최종 결과': 'archive',
 };
 
-function JobDetailPage({ jobId }: JobDetailPageProps) {
+function JobDetailPage({ jobId, initialTab = 'info' }: JobDetailPageProps) {
   const router = useRouter();
   const allJobs = useJobStore((state) => state.allJobs);
   const loadAllJobs = useJobStore((state) => state.loadAllJobs);
@@ -69,7 +70,7 @@ function JobDetailPage({ jobId }: JobDetailPageProps) {
   const archiveJob = useJobStore((state) => state.archiveJob);
 
   const [loaded, setLoaded] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState<JobDetailTab>('info');
+  const [activeTab, setActiveTab] = React.useState<JobDetailTab>(initialTab);
   const [editOpen, setEditOpen] = React.useState(false);
   const [archiveOpen, setArchiveOpen] = React.useState(false);
 

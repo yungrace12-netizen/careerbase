@@ -5,6 +5,7 @@ import {
   CalendarDays,
   FileStack,
   LucideIcon,
+  Search,
   Settings,
   UserRound,
   UsersRound,
@@ -21,6 +22,11 @@ export const desktopNavigationItems: NavigationItem[] = [
     label: '캘린더',
     href: '/',
     icon: CalendarDays,
+  },
+  {
+    label: 'Search',
+    href: '/search',
+    icon: Search,
   },
   {
     label: 'Jobs',
@@ -78,6 +84,11 @@ export const mobilePrimaryNavigationItems: NavigationItem[] = [
 ];
 
 export const mobileMoreNavigationItems: NavigationItem[] = [
+  {
+    label: 'Search',
+    href: '/search',
+    icon: Search,
+  },
   {
     label: 'Applications',
     href: '/applications',
