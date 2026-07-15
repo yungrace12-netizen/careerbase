@@ -1,10 +1,5 @@
-import { PlaceholderPage } from '@/components/layout';
+import { ProfilePage as ProfileFeaturePage } from '@/features/profile';
 
 export default function ProfilePage() {
-  return (
-    <PlaceholderPage
-      title="Profile"
-      description="프로필 관리 화면의 placeholder입니다."
-    />
-  );
+  return <ProfileFeaturePage />;
 }

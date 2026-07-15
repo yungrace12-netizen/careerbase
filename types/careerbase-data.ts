@@ -5,42 +5,12 @@ import type {
   Experience,
 } from '@/types/essay';
 import type { InterviewStage } from '@/types/interview';
+import type { Profile } from '@/types/profile';
 
 export interface OnboardingData {
   isCompleted: boolean;
   selectedMode: 'sample' | 'empty' | null;
   completedAt: string | null;
-}
-
-export interface PersonalInfo {
-  name: string;
-  birthDate: string | null;
-  address: string;
-  englishAddress: string;
-  profilePhotoFileName: string;
-  profilePhotoLocation: string;
-  desiredSalary: number | null;
-  salaryCurrency: 'KRW';
-  updatedAt: string;
-}
-
-export interface OtherInfo {
-  hobby: string;
-  specialty: string;
-  updatedAt: string;
-}
-
-export interface Profile {
-  personalInfo: PersonalInfo;
-  highSchools: [];
-  universities: [];
-  careers: [];
-  languages: [];
-  certificates: [];
-  awards: [];
-  activities: [];
-  otherInfo: OtherInfo;
-  updatedAt: string;
 }
 
 export interface AppSettings {
