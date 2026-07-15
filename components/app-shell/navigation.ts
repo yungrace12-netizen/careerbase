@@ -1,5 +1,6 @@
 import {
   Archive,
+  BookOpenText,
   BriefcaseBusiness,
   CalendarDays,
   FileStack,
@@ -35,6 +36,11 @@ export const desktopNavigationItems: NavigationItem[] = [
     label: 'Interview',
     href: '/interview',
     icon: UsersRound,
+  },
+  {
+    label: 'Experience',
+    href: '/experience',
+    icon: BookOpenText,
   },
   {
     label: 'Profile',
@@ -81,6 +87,11 @@ export const mobileMoreNavigationItems: NavigationItem[] = [
     label: 'Interview',
     href: '/interview',
     icon: UsersRound,
+  },
+  {
+    label: 'Experience',
+    href: '/experience',
+    icon: BookOpenText,
   },
   {
     label: 'Archive',

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import { essayRepository } from '@/repositories/essayRepository';
+import { experienceRepository } from '@/repositories/experienceRepository';
 import type {
   AttachmentMetadata,
   CreateAttachmentMetadataInput,
@@ -56,7 +57,7 @@ function loadJobScopedData(jobId: EntityId) {
   return {
     essays,
     attachments: loadAttachmentsForEssays(essays),
-    experiences: essayRepository.getExperiences(),
+    experiences: experienceRepository.getExperiences(),
   };
 }
 

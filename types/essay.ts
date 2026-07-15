@@ -68,6 +68,21 @@ export type UpdateEssayInput = Partial<
   Pick<Essay, 'question' | 'finalAnswer' | 'attachmentIds' | 'experienceIds'>
 >;
 
+export type CreateExperienceInput = Pick<
+  Experience,
+  | 'title'
+  | 'situation'
+  | 'task'
+  | 'action'
+  | 'result'
+  | 'measurableOutcome'
+  | 'competencyTags'
+  | 'relatedJobIds'
+  | 'memo'
+>;
+
+export type UpdateExperienceInput = Partial<CreateExperienceInput>;
+
 export type CreateAttachmentMetadataInput = Pick<
   AttachmentMetadata,
   | 'jobId'

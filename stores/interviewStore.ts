@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { essayRepository } from '@/repositories/essayRepository';
+import { experienceRepository } from '@/repositories/experienceRepository';
 import { interviewRepository } from '@/repositories/interviewRepository';
 import type { Experience } from '@/types/essay';
 import type {
@@ -96,7 +96,7 @@ const defaultSaveStatus: InterviewSaveStatus = {
 function loadJobScopedData(jobId: EntityId) {
   return {
     stages: interviewRepository.getInterviewStagesByJobId(jobId),
-    experiences: essayRepository.getExperiences(),
+    experiences: experienceRepository.getExperiences(),
   };
 }
 
