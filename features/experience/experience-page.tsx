@@ -1,7 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { Plus, Save, Trash2, X } from 'lucide-react';
+import Link from 'next/link';
+import {
+  Check,
+  ClipboardPaste,
+  Copy,
+  ExternalLink,
+  FileDown,
+  Sparkles,
+} from 'lucide-react';
 
 import {
   Container,
@@ -9,7 +17,7 @@ import {
   PageWrapper,
 } from '@/components/layout';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -17,875 +25,498 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { EmptyState } from '@/components/ui/empty-state';
-import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
-import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Toast, ToastViewport } from '@/components/ui/toast';
 import { Typography } from '@/components/ui/typography';
+import { cn } from '@/lib/utils';
+import { buildExperienceReportPrompt } from '@/features/experience/build-experience-report-prompt';
 import {
-  useExperienceStore,
-  type ExperienceSaveStatus,
-} from '@/stores/experienceStore';
-import type {
-  CreateExperienceInput,
-  Experience,
-  UpdateExperienceInput,
-} from '@/types/essay';
-import type { EntityId, Job } from '@/types/job';
-
-type EditorMode = 'create' | 'edit';
-
-interface ExperienceDraft {
-  title: string;
-  situation: string;
-  task: string;
-  action: string;
-  result: string;
-  measurableOutcome: string;
-  competencyTags: string[];
-  relatedJobIds: EntityId[];
-  memo: string;
-}
-
-const emptyDraft: ExperienceDraft = {
-  title: '',
-  situation: '',
-  task: '',
-  action: '',
-  result: '',
-  measurableOutcome: '',
-  competencyTags: [],
-  relatedJobIds: [],
-  memo: '',
-};
-
-const suggestedTags = ['문제 해결', '협업', '데이터 분석', '기획', '커뮤니케이션'];
+  createEmptyExperienceReportDraft,
+  parseExperienceReportResultText,
+  splitLinesToList,
+} from '@/features/experience/parse-experience-report-result';
+import { experienceReportRepository } from '@/repositories/experienceReportRepository';
+import {
+  EXPERIENCE_REPORT_AI_LINKS,
+  EXPERIENCE_REPORT_FIELD_OPTIONS,
+  type ExperienceReport,
+  type ExperienceReportDraft,
+  type ExperienceReportFieldKey,
+} from '@/types/experience-report';
 
 function ExperiencePage() {
-  const experiences = useExperienceStore((state) => state.experiences);
-  const filteredExperiences = useExperienceStore(
-    (state) => state.filteredExperiences,
+  const [prompt, setPrompt] = React.useState('');
+  const [savedReport, setSavedReport] =
+    React.useState<ExperienceReport | null>(null);
+  const [copyDone, setCopyDone] = React.useState(false);
+  const [importOpen, setImportOpen] = React.useState(false);
+  const [rawResult, setRawResult] = React.useState('');
+  const [draft, setDraft] = React.useState<ExperienceReportDraft>(
+    createEmptyExperienceReportDraft(),
   );
-  const jobs = useExperienceStore((state) => state.jobs);
-  const query = useExperienceStore((state) => state.query);
-  const selectedTag = useExperienceStore((state) => state.selectedTag);
-  const selectedJobId = useExperienceStore((state) => state.selectedJobId);
-  const saveStatuses = useExperienceStore((state) => state.saveStatuses);
-  const loadExperiences = useExperienceStore((state) => state.loadExperiences);
-  const createExperience = useExperienceStore(
-    (state) => state.createExperience,
-  );
-  const deleteExperience = useExperienceStore(
-    (state) => state.deleteExperience,
-  );
-  const saveExperience = useExperienceStore((state) => state.saveExperience);
-  const search = useExperienceStore((state) => state.search);
-  const setTagFilter = useExperienceStore((state) => state.setTagFilter);
-  const setJobFilter = useExperienceStore((state) => state.setJobFilter);
-  const resetFilters = useExperienceStore((state) => state.resetFilters);
-
-  const [filterOpen, setFilterOpen] = React.useState(false);
-  const [editorMode, setEditorMode] = React.useState<EditorMode>('create');
-  const [editingExperienceId, setEditingExperienceId] =
-    React.useState<EntityId | null>(null);
-  const [editorOpen, setEditorOpen] = React.useState(false);
-  const [deleteTarget, setDeleteTarget] = React.useState<Experience | null>(
-    null,
-  );
+  const [selectedFields, setSelectedFields] = React.useState<
+    ExperienceReportFieldKey[]
+  >(EXPERIENCE_REPORT_FIELD_OPTIONS.map((field) => field.key));
+  const [toastMessage, setToastMessage] = React.useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    loadExperiences();
-  }, [loadExperiences]);
+    const timeoutId = window.setTimeout(() => {
+      setSavedReport(experienceReportRepository.getLatestExperienceReport());
+    }, 0);
 
-  const editingExperience =
-    experiences.find((experience) => experience.id === editingExperienceId) ??
-    null;
-  const allTags = Array.from(
-    new Set(experiences.flatMap((experience) => experience.competencyTags)),
-  ).sort((a, b) => a.localeCompare(b, 'ko-KR'));
-  const hasActiveFilter = Boolean(query || selectedTag || selectedJobId);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
-  const openCreateEditor = () => {
-    setEditorMode('create');
-    setEditingExperienceId(null);
-    setEditorOpen(true);
+  const handleGeneratePrompt = () => {
+    const nextPrompt = buildExperienceReportPrompt();
+    setPrompt(nextPrompt);
+    setErrorMessage(null);
+    setToastMessage('모든 취업 데이터를 모아 AI Prompt를 생성했습니다.');
   };
 
-  const openEditEditor = (experience: Experience) => {
-    setEditorMode('edit');
-    setEditingExperienceId(experience.id);
-    setEditorOpen(true);
+  const handleCopyPrompt = async () => {
+    if (!prompt.trim()) {
+      setErrorMessage('먼저 AI Prompt를 생성해주세요.');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopyDone(true);
+      setToastMessage('Prompt를 복사했습니다.');
+      window.setTimeout(() => setCopyDone(false), 1500);
+    } catch {
+      setErrorMessage(
+        'Prompt 복사에 실패했습니다. 텍스트를 직접 선택해 복사해주세요.',
+      );
+    }
   };
 
-  const handleCreate = (input: CreateExperienceInput) => {
-    const experience = createExperience(input);
-    setEditorMode('edit');
-    setEditingExperienceId(experience.id);
+  const openExternalAi = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleOpenImport = () => {
+    setRawResult(savedReport?.rawText ?? '');
+    setDraft(
+      savedReport
+        ? reportToDraft(savedReport)
+        : createEmptyExperienceReportDraft(),
+    );
+    setSelectedFields(
+      EXPERIENCE_REPORT_FIELD_OPTIONS.map((field) => field.key),
+    );
+    setImportOpen(true);
+  };
+
+  const handleParseRawResult = () => {
+    setDraft(parseExperienceReportResultText(rawResult));
+  };
+
+  const toggleField = (key: ExperienceReportFieldKey) => {
+    setSelectedFields((current) =>
+      current.includes(key)
+        ? current.filter((item) => item !== key)
+        : [...current, key],
+    );
+  };
+
+  const handleSaveImport = () => {
+    if (selectedFields.length === 0) {
+      setErrorMessage('저장할 항목을 하나 이상 선택해주세요.');
+      return;
+    }
+
+    const existing = experienceReportRepository.getLatestExperienceReport();
+    const nextInput = {
+      rawText: rawResult,
+      oneLiner: selectedFields.includes('oneLiner')
+        ? draft.oneLiner.trim()
+        : (existing?.oneLiner ?? ''),
+      strengths: selectedFields.includes('strengths')
+        ? draft.strengths.trim()
+        : (existing?.strengths ?? ''),
+      weaknesses: selectedFields.includes('weaknesses')
+        ? draft.weaknesses.trim()
+        : (existing?.weaknesses ?? ''),
+      personality: selectedFields.includes('personality')
+        ? draft.personality.trim()
+        : (existing?.personality ?? ''),
+      recommendedRoles: selectedFields.includes('recommendedRoles')
+        ? draft.recommendedRoles.trim()
+        : (existing?.recommendedRoles ?? ''),
+      recommendedCompanyTypes: selectedFields.includes(
+        'recommendedCompanyTypes',
+      )
+        ? draft.recommendedCompanyTypes.trim()
+        : (existing?.recommendedCompanyTypes ?? ''),
+      recommendedExperiences: selectedFields.includes(
+        'recommendedExperiences',
+      )
+        ? draft.recommendedExperiences.trim()
+        : (existing?.recommendedExperiences ?? ''),
+      recommendedEssays: selectedFields.includes('recommendedEssays')
+        ? draft.recommendedEssays.trim()
+        : (existing?.recommendedEssays ?? ''),
+      expectedQuestions: selectedFields.includes('expectedQuestionsText')
+        ? splitLinesToList(draft.expectedQuestionsText)
+        : (existing?.expectedQuestions ?? []),
+      followUpQuestions: selectedFields.includes('followUpQuestionsText')
+        ? splitLinesToList(draft.followUpQuestionsText)
+        : (existing?.followUpQuestions ?? []),
+      pressureQuestions: selectedFields.includes('pressureQuestionsText')
+        ? splitLinesToList(draft.pressureQuestionsText)
+        : (existing?.pressureQuestions ?? []),
+      answerImprovements: selectedFields.includes('answerImprovements')
+        ? draft.answerImprovements.trim()
+        : (existing?.answerImprovements ?? ''),
+      careerStrategy: selectedFields.includes('careerStrategy')
+        ? draft.careerStrategy.trim()
+        : (existing?.careerStrategy ?? ''),
+      interviewReadiness: selectedFields.includes('interviewReadiness')
+        ? draft.interviewReadiness.trim()
+        : (existing?.interviewReadiness ?? ''),
+      careerReadiness: selectedFields.includes('careerReadiness')
+        ? draft.careerReadiness.trim()
+        : (existing?.careerReadiness ?? ''),
+      aiOpinion: selectedFields.includes('aiOpinion')
+        ? draft.aiOpinion.trim()
+        : (existing?.aiOpinion ?? ''),
+      suggestedAdditionalData: selectedFields.includes(
+        'suggestedAdditionalData',
+      )
+        ? draft.suggestedAdditionalData.trim()
+        : (existing?.suggestedAdditionalData ?? ''),
+    };
+
+    const saved =
+      experienceReportRepository.upsertExperienceReport(nextInput);
+    setSavedReport(saved);
+    setImportOpen(false);
+    setErrorMessage(null);
+    setToastMessage('선택한 AI 분석 결과를 저장했습니다.');
   };
 
   return (
-    <PageWrapper className="lg:h-[calc(100dvh-4rem)] lg:overflow-hidden">
-      <Container className="lg:h-full">
-        <ContentWrapper className="lg:h-full lg:overflow-hidden">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+    <PageWrapper>
+      <Container>
+        <ContentWrapper className="grid gap-6">
+          <div className="grid gap-2">
+            <Typography variant="heading">AI Experience Library</Typography>
             <Typography variant="body" tone="secondary">
-              자소서와 면접에서 재사용할 프로젝트와 성과 경험을 STAR 구조로 저장합니다.
+              CareerBase에 쌓인 모든 취업 데이터를 자동으로 모아, 나라는 사람을
+              설명하는 AI 취업 데이터 리포트를 만듭니다. 경험 입력란은 없으며,
+              AI는 분석만 수행합니다.
             </Typography>
-            <Button type="button" onClick={openCreateEditor}>
-              <Plus className="size-5" aria-hidden />
-              경험 추가
-            </Button>
           </div>
 
-          <section className="grid min-h-0 flex-1 gap-4 lg:overflow-hidden">
-            <Card className="shrink-0">
-              <div className="grid gap-4">
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
-                  <Input
-                    label="검색"
-                    value={query}
-                    onChange={(event) => search(event.target.value)}
-                    placeholder="제목, STAR 내용, 메모를 검색하세요."
-                    containerClassName="lg:flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="md:hidden"
-                    onClick={() => setFilterOpen((open) => !open)}
-                  >
-                    {filterOpen ? '필터 닫기' : '필터 열기'}
-                  </Button>
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <CardTitle>AI 분석하기</CardTitle>
+                  <CardDescription className="mt-2">
+                    Profile · 공고 · 자소서 · 면접 · 회사정보 · Archive · 기존
+                    경험 · AI 분석 결과를 모아 Prompt를 만든 뒤, ChatGPT /
+                    Claude / Gemini에서 분석하고 결과를 선택 저장하세요.
+                  </CardDescription>
                 </div>
-
-                <div
-                  className={
-                    filterOpen
-                      ? 'grid gap-3 md:grid'
-                      : 'hidden gap-3 md:grid md:grid-cols-2'
+                <Badge variant="primary">Experience AI</Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" onClick={handleGeneratePrompt}>
+                  <Sparkles className="size-4" aria-hidden />
+                  AI 분석하기
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => void handleCopyPrompt()}
+                >
+                  {copyDone ? (
+                    <Check className="size-4" aria-hidden />
+                  ) : (
+                    <Copy className="size-4" aria-hidden />
+                  )}
+                  Prompt 복사하기
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() =>
+                    openExternalAi(EXPERIENCE_REPORT_AI_LINKS.chatgpt)
                   }
                 >
-                  <div className="grid gap-2">
-                    <Typography variant="small" className="font-medium">
-                      핵심 역량 태그
-                    </Typography>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setTagFilter('')}
-                        className={
-                          selectedTag
-                            ? 'rounded-[var(--radius-badge)] bg-muted px-3 py-2 text-[length:var(--text-caption)] text-text-secondary'
-                            : 'rounded-[var(--radius-badge)] bg-primary/10 px-3 py-2 text-[length:var(--text-caption)] font-medium text-primary'
-                        }
-                      >
-                        전체
-                      </button>
-                      {allTags.map((tag) => (
-                        <button
-                          key={tag}
-                          type="button"
-                          onClick={() => setTagFilter(tag)}
-                          className={
-                            selectedTag === tag
-                              ? 'rounded-[var(--radius-badge)] bg-primary/10 px-3 py-2 text-[length:var(--text-caption)] font-medium text-primary'
-                              : 'rounded-[var(--radius-badge)] bg-muted px-3 py-2 text-[length:var(--text-caption)] text-text-secondary'
-                          }
-                        >
-                          {tag}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Select
-                      label="관련 공고"
-                      id="experience-job-filter"
-                      value={selectedJobId}
-                      onChange={(event) => setJobFilter(event.target.value)}
-                    >
-                      <option value="">전체 공고</option>
-                      {jobs.map((job) => (
-                        <option key={job.id} value={job.id}>
-                          {job.companyName} · {job.postingTitle}
-                          {job.isArchived ? ' (Archive)' : ''}
-                        </option>
-                      ))}
-                    </Select>
-                </div>
-
-                {hasActiveFilter ? (
-                  <div className="flex justify-end">
-                    <Button type="button" variant="secondary" onClick={resetFilters}>
-                      검색어와 필터 초기화
-                    </Button>
-                  </div>
+                  <ExternalLink className="size-4" aria-hidden />
+                  ChatGPT 열기
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() =>
+                    openExternalAi(EXPERIENCE_REPORT_AI_LINKS.claude)
+                  }
+                >
+                  <ExternalLink className="size-4" aria-hidden />
+                  Claude 열기
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() =>
+                    openExternalAi(EXPERIENCE_REPORT_AI_LINKS.gemini)
+                  }
+                >
+                  <ExternalLink className="size-4" aria-hidden />
+                  Gemini 열기
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleOpenImport}
+                >
+                  <ClipboardPaste className="size-4" aria-hidden />
+                  AI 결과 가져오기
+                </Button>
+                {savedReport ? (
+                  <Link
+                    href="/experience/print"
+                    className={cn(buttonVariants({ variant: 'ghost' }))}
+                  >
+                    <FileDown className="size-4" aria-hidden />
+                    PDF 저장하기
+                  </Link>
                 ) : null}
               </div>
-            </Card>
 
-            <div className="min-h-0 lg:overflow-y-auto lg:pr-1">
-              {experiences.length === 0 ? (
-                <Card>
-                  <EmptyState
-                    title="아직 저장된 경험이 없습니다."
-                    description="프로젝트, 업무, 활동 경험을 기록해두면 자소서와 면접에서 재사용할 수 있습니다."
-                    action={
-                      <Button type="button" onClick={openCreateEditor}>
-                        경험 추가
-                      </Button>
-                    }
-                  />
-                </Card>
-              ) : filteredExperiences.length === 0 ? (
-                <Card>
-                  <EmptyState
-                    title="조건에 맞는 경험이 없습니다."
-                    description="검색어나 필터 조건을 바꿔 다시 확인해보세요."
-                    action={
-                      <Button type="button" variant="secondary" onClick={resetFilters}>
-                        검색어와 필터 초기화
-                      </Button>
-                    }
-                  />
-                </Card>
+              {errorMessage ? (
+                <Typography variant="small" className="text-danger">
+                  {errorMessage}
+                </Typography>
+              ) : null}
+
+              {prompt ? (
+                <Textarea
+                  label="생성된 AI Prompt"
+                  value={prompt}
+                  readOnly
+                  className="min-h-64 font-mono text-[length:var(--text-small)]"
+                />
               ) : (
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-                  {filteredExperiences.map((experience) => (
-                    <ExperienceCard
-                      key={experience.id}
-                      experience={experience}
-                      jobs={jobs}
-                      onOpen={() => openEditEditor(experience)}
-                    />
-                  ))}
-                </div>
+                <Typography variant="small" tone="secondary">
+                  AI 분석하기를 누르면 CareerBase의 모든 취업 데이터가 하나의
+                  분석 요청문으로 정리됩니다. 사용자는 아무것도 입력하지
+                  않습니다.
+                </Typography>
               )}
-            </div>
-          </section>
+            </CardContent>
+          </Card>
+
+          {savedReport ? (
+            <ExperienceReportView report={savedReport} />
+          ) : (
+            <Card>
+              <CardContent className="py-10">
+                <Typography variant="body" tone="secondary" className="text-center">
+                  아직 저장된 AI Experience Report가 없습니다. Prompt를 생성해
+                  외부 AI에서 분석한 뒤, 결과를 가져와 검토·저장하세요.
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
         </ContentWrapper>
       </Container>
 
-      {editorOpen ? (
-        <ExperienceEditorModal
-          key={`${editorMode}-${editingExperience?.id ?? 'new'}`}
-          mode={editorMode}
-          open={editorOpen}
-          experience={editingExperience}
-          jobs={jobs}
-          saveStatus={
-            editingExperience ? saveStatuses[editingExperience.id] : undefined
-          }
-          onOpenChange={setEditorOpen}
-          onCreate={handleCreate}
-          onSave={(id, input) => saveExperience(id, input)}
-          onDelete={(experience) => {
-            setEditorOpen(false);
-            setDeleteTarget(experience);
-          }}
-        />
-      ) : null}
-
       <Modal
-        open={Boolean(deleteTarget)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDeleteTarget(null);
-          }
-        }}
-        title="Experience 삭제"
-        confirmLabel="삭제"
-        danger
-        onConfirm={() => {
-          if (!deleteTarget) {
-            return;
-          }
-
-          deleteExperience(deleteTarget.id);
-          setDeleteTarget(null);
-        }}
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        title="AI 결과 가져오기"
+        description="생성형 AI 답변을 붙여넣고 자동 분류한 뒤, 저장할 항목만 선택하세요. 자동 저장되지 않습니다."
+        confirmLabel="선택 항목 저장"
+        onConfirm={handleSaveImport}
+        className="max-h-[90dvh] max-w-3xl overflow-y-auto"
       >
-        <Typography variant="body">
-          이 경험을 삭제할까요? 자소서와 면접에 연결된 기록에서도 연결이
-          해제됩니다.
-        </Typography>
+        <div className="grid gap-4">
+          <Textarea
+            label="AI 결과 붙여넣기"
+            value={rawResult}
+            onChange={(event) => setRawResult(event.target.value)}
+            className="min-h-40"
+            placeholder="ChatGPT, Claude, Gemini 등의 답변을 붙여넣으세요."
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleParseRawResult}
+          >
+            붙여넣은 내용 자동 분류
+          </Button>
+
+          <div className="grid gap-2">
+            <Typography variant="small" className="font-semibold">
+              저장할 항목
+            </Typography>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {EXPERIENCE_REPORT_FIELD_OPTIONS.map((field) => (
+                <label
+                  key={field.key}
+                  className="flex items-center gap-2 rounded-[var(--radius-button)] border border-border px-3 py-2"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedFields.includes(field.key)}
+                    onChange={() => toggleField(field.key)}
+                  />
+                  <Typography variant="small">{field.label}</Typography>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {EXPERIENCE_REPORT_FIELD_OPTIONS.map((field) => (
+            <Textarea
+              key={field.key}
+              label={field.label}
+              value={draft[field.key]}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  [field.key]: event.target.value,
+                }))
+              }
+              className="min-h-24"
+            />
+          ))}
+        </div>
       </Modal>
+
+      {toastMessage ? (
+        <ToastViewport>
+          <Toast
+            variant="success"
+            title={toastMessage}
+            onClose={() => setToastMessage(null)}
+          />
+        </ToastViewport>
+      ) : null}
     </PageWrapper>
   );
 }
 
-function ExperienceCard({
-  experience,
-  jobs,
-  onOpen,
-}: {
-  experience: Experience;
-  jobs: Job[];
-  onOpen: () => void;
-}) {
+function ExperienceReportView({ report }: { report: ExperienceReport }) {
   return (
-    <button type="button" className="h-full text-left" onClick={onOpen}>
-      <Card className="h-full transition-colors hover:border-primary/40">
-        <CardHeader>
-          <CardTitle>{experience.title || '제목 없는 경험'}</CardTitle>
-          <CardDescription>
-            최근 수정일 {formatDateTime(experience.updatedAt)}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {experience.competencyTags.length > 0 ? (
-              experience.competencyTags.map((tag) => (
-                <Badge key={tag} variant="primary">
-                  {tag}
-                </Badge>
-              ))
-            ) : (
-              <Badge variant="default">태그 없음</Badge>
-            )}
-          </div>
-          <SummaryItem label="결과 요약" value={experience.result} />
-          <SummaryItem label="수치 성과" value={experience.measurableOutcome} />
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="default">
-              연결된 공고 {experience.relatedJobIds.length}개
-            </Badge>
-            {getRelatedJobs(experience, jobs).some((job) => job.isArchived) ? (
-              <Badge variant="archive">Archive 포함</Badge>
-            ) : null}
-          </div>
-        </CardContent>
-      </Card>
-    </button>
-  );
-}
+    <div className="grid gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Typography variant="section">AI Experience Report</Typography>
+        <Link
+          href="/experience/print"
+          className={cn(buttonVariants({ variant: 'secondary' }))}
+        >
+          <FileDown className="size-4" aria-hidden />
+          PDF 저장하기
+        </Link>
+      </div>
 
-function SummaryItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="grid gap-1">
-      <Typography variant="caption" tone="secondary">
-        {label}
-      </Typography>
-      <Typography variant="small" className="line-clamp-3">
-        {value || '미입력'}
-      </Typography>
+      <ReportSection title="나를 한 줄로 표현하면?" value={report.oneLiner} />
+      <ReportSection title="나의 강점" value={report.strengths} />
+      <ReportSection title="나의 약점" value={report.weaknesses} />
+      <ReportSection title="나의 성향" value={report.personality} />
+      <ReportSection title="추천 직무" value={report.recommendedRoles} />
+      <ReportSection
+        title="추천 기업 유형"
+        value={report.recommendedCompanyTypes}
+      />
+      <ReportSection title="추천 경험" value={report.recommendedExperiences} />
+      <ReportSection title="추천 자소서" value={report.recommendedEssays} />
+      <ReportListSection title="예상 질문" items={report.expectedQuestions} />
+      <ReportListSection title="꼬리 질문" items={report.followUpQuestions} />
+      <ReportListSection title="압박 질문" items={report.pressureQuestions} />
+      <ReportSection
+        title="답변 보완 사항"
+        value={report.answerImprovements}
+      />
+      <ReportSection title="취업 전략" value={report.careerStrategy} />
+      <ReportSection title="면접 준비도" value={report.interviewReadiness} />
+      <ReportSection title="취업 준비도" value={report.careerReadiness} />
+      <ReportSection title="AI 의견" value={report.aiOpinion} />
+      <ReportSection
+        title="추가하면 좋은 경험"
+        value={report.suggestedAdditionalData}
+      />
     </div>
   );
 }
 
-function ExperienceEditorModal({
-  mode,
-  open,
-  experience,
-  jobs,
-  saveStatus,
-  onOpenChange,
-  onCreate,
-  onSave,
-  onDelete,
-}: {
-  mode: EditorMode;
-  open: boolean;
-  experience: Experience | null;
-  jobs: Job[];
-  saveStatus?: ExperienceSaveStatus;
-  onOpenChange: (open: boolean) => void;
-  onCreate: (input: CreateExperienceInput) => void;
-  onSave: (id: EntityId, input: UpdateExperienceInput) => void;
-  onDelete: (experience: Experience) => void;
-}) {
-  const [draft, setDraft] = React.useState<ExperienceDraft>(
-    experience ? experienceToDraft(experience) : emptyDraft,
-  );
-  const [tagInput, setTagInput] = React.useState('');
-
-  const autoSaveDirty = experience
-    ? draft.situation !== experience.situation ||
-      draft.task !== experience.task ||
-      draft.action !== experience.action ||
-      draft.result !== experience.result ||
-      draft.measurableOutcome !== experience.measurableOutcome ||
-      draft.memo !== experience.memo
-    : false;
-  const canSubmit = draft.title.trim().length > 0;
-
-  React.useEffect(() => {
-    if (!experience || !autoSaveDirty) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      onSave(experience.id, {
-        situation: draft.situation,
-        task: draft.task,
-        action: draft.action,
-        result: draft.result,
-        measurableOutcome: draft.measurableOutcome,
-        memo: draft.memo,
-      });
-    }, 1000);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [
-    autoSaveDirty,
-    draft.action,
-    draft.measurableOutcome,
-    draft.memo,
-    draft.result,
-    draft.situation,
-    draft.task,
-    experience,
-    onSave,
-  ]);
-
-  const addTag = (tag: string) => {
-    const trimmedTag = tag.trim();
-
-    if (!trimmedTag || draft.competencyTags.includes(trimmedTag)) {
-      setTagInput('');
-      return;
-    }
-
-    setDraft((current) => ({
-      ...current,
-      competencyTags: [...current.competencyTags, trimmedTag],
-    }));
-    setTagInput('');
-  };
-
-  const handleSubmit = () => {
-    if (!canSubmit) {
-      return;
-    }
-
-    const input = draftToInput(draft);
-
-    if (mode === 'create') {
-      onCreate(input);
-      return;
-    }
-
-    if (experience) {
-      onSave(experience.id, input);
-    }
-  };
-
+function ReportSection({ title, value }: { title: string; value: string }) {
   return (
-    <Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title={mode === 'create' ? '경험 추가' : '경험 상세 및 수정'}
-      description="STAR 구조와 핵심 역량, 관련 공고를 기록합니다."
-      className="max-h-[90dvh] max-w-4xl overflow-hidden"
-      footer={
-        <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-          <div>
-            {mode === 'edit' && experience ? (
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => onDelete(experience)}
-              >
-                <Trash2 className="size-4" aria-hidden />
-                삭제
-              </Button>
-            ) : null}
-          </div>
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => onOpenChange(false)}
-            >
-              닫기
-            </Button>
-            <Button type="button" onClick={handleSubmit} disabled={!canSubmit}>
-              <Save className="size-4" aria-hidden />
-              {mode === 'create' ? '추가' : '수동 저장'}
-            </Button>
-          </div>
-        </div>
-      }
-    >
-      <div className="max-h-[calc(90dvh-12rem)] overflow-y-auto pr-1">
-        <div className="grid gap-5">
-          {mode === 'edit' ? (
-            <SaveStatusText status={saveStatus} isDirty={autoSaveDirty} />
-          ) : null}
-
-          <Input
-            label="경험명"
-            value={draft.title}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                title: event.target.value,
-              }))
-            }
-            placeholder="경험 제목을 입력하세요."
-          />
-
-          <section className="grid gap-4 rounded-[var(--radius-card)] border border-border bg-background p-4">
-            <div>
-              <Typography variant="card-title">STAR 구조</Typography>
-              <Typography variant="small" tone="secondary" className="mt-1">
-                각 항목을 분리해두면 자소서와 면접에서 필요한 경험을 빠르게
-                찾을 수 있습니다.
-              </Typography>
-            </div>
-            <Textarea
-              label="Situation: 당시 상황"
-              value={draft.situation}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  situation: event.target.value,
-                }))
-              }
-              placeholder="당시 상황을 입력하세요."
-              className="min-h-28"
-            />
-            <Textarea
-              label="Task: 해결해야 했던 과제"
-              value={draft.task}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  task: event.target.value,
-                }))
-              }
-              placeholder="과제 또는 문제를 입력하세요."
-              className="min-h-28"
-            />
-            <Textarea
-              label="Action: 직접 수행한 행동"
-              value={draft.action}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  action: event.target.value,
-                }))
-              }
-              placeholder="직접 수행한 행동을 입력하세요."
-              className="min-h-28"
-            />
-            <Textarea
-              label="Result: 결과와 성과"
-              value={draft.result}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  result: event.target.value,
-                }))
-              }
-              placeholder="결과와 성과를 입력하세요."
-              className="min-h-28"
-            />
-          </section>
-
-          <Textarea
-            label="수치 성과"
-            value={draft.measurableOutcome}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                measurableOutcome: event.target.value,
-              }))
-            }
-            placeholder="예: 전환율 12% 개선, 처리 시간 30% 단축"
-            className="min-h-24"
-          />
-
-          <TagEditor
-            tags={draft.competencyTags}
-            tagInput={tagInput}
-            onTagInputChange={setTagInput}
-            onAddTag={addTag}
-            onRemoveTag={(tag) =>
-              setDraft((current) => ({
-                ...current,
-                competencyTags: current.competencyTags.filter(
-                  (item) => item !== tag,
-                ),
-              }))
-            }
-          />
-
-          <RelatedJobSelector
-            jobs={jobs}
-            selectedIds={draft.relatedJobIds}
-            onChange={(relatedJobIds) =>
-              setDraft((current) => ({
-                ...current,
-                relatedJobIds,
-              }))
-            }
-          />
-
-          <Textarea
-            label="자유 메모"
-            value={draft.memo}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                memo: event.target.value,
-              }))
-            }
-            placeholder="이 경험과 관련해 추가로 기억할 내용을 입력하세요."
-            className="min-h-32"
-          />
-        </div>
-      </div>
-    </Modal>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-[length:var(--text-body)]">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Typography variant="small" className="whitespace-pre-wrap">
+          {value.trim() ? value : '저장된 내용 없음'}
+        </Typography>
+      </CardContent>
+    </Card>
   );
 }
 
-function TagEditor({
-  tags,
-  tagInput,
-  onTagInputChange,
-  onAddTag,
-  onRemoveTag,
+function ReportListSection({
+  title,
+  items,
 }: {
-  tags: string[];
-  tagInput: string;
-  onTagInputChange: (value: string) => void;
-  onAddTag: (tag: string) => void;
-  onRemoveTag: (tag: string) => void;
+  title: string;
+  items: string[];
 }) {
   return (
-    <section className="grid gap-3 rounded-[var(--radius-card)] border border-border bg-background p-4">
-      <div>
-        <Typography variant="card-title">핵심 역량 태그</Typography>
-        <Typography variant="small" tone="secondary" className="mt-1">
-          중복 태그와 빈 태그는 저장하지 않습니다.
-        </Typography>
-      </div>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Input
-          label="태그 입력"
-          value={tagInput}
-          onChange={(event) => onTagInputChange(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault();
-              onAddTag(tagInput);
-            }
-          }}
-          placeholder="예: 문제 해결"
-          containerClassName="sm:flex-1"
-        />
-        <Button
-          type="button"
-          variant="secondary"
-          className="self-end"
-          onClick={() => onAddTag(tagInput)}
-        >
-          태그 추가
-        </Button>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {suggestedTags.map((tag) => (
-          <button
-            key={tag}
-            type="button"
-            onClick={() => onAddTag(tag)}
-            className="rounded-[var(--radius-badge)] bg-muted px-3 py-2 text-[length:var(--text-caption)] text-text-secondary hover:text-text-primary"
-          >
-            {tag}
-          </button>
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {tags.length > 0 ? (
-          tags.map((tag) => (
-            <Badge key={tag} variant="primary" className="gap-2">
-              {tag}
-              <button
-                type="button"
-                aria-label={`${tag} 태그 삭제`}
-                onClick={() => onRemoveTag(tag)}
-                className="rounded-[var(--radius-button)]"
-              >
-                <X className="size-3" aria-hidden />
-              </button>
-            </Badge>
-          ))
-        ) : (
-          <Typography variant="caption" tone="secondary">
-            등록된 태그가 없습니다.
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-[length:var(--text-body)]">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {items.length === 0 ? (
+          <Typography variant="small" tone="secondary">
+            저장된 내용 없음
           </Typography>
-        )}
-      </div>
-    </section>
-  );
-}
-
-function RelatedJobSelector({
-  jobs,
-  selectedIds,
-  onChange,
-}: {
-  jobs: Job[];
-  selectedIds: EntityId[];
-  onChange: (jobIds: EntityId[]) => void;
-}) {
-  const selectedJobs = jobs.filter((job) => selectedIds.includes(job.id));
-
-  return (
-    <section className="grid gap-3 rounded-[var(--radius-card)] border border-border bg-background p-4">
-      <div>
-        <Typography variant="card-title">관련 공고</Typography>
-        <Typography variant="small" tone="secondary" className="mt-1">
-          여러 공고를 연결할 수 있으며, Job 원본 데이터는 변경하지 않습니다.
-        </Typography>
-      </div>
-      {jobs.length > 0 ? (
-        <div className="grid gap-2">
-          {jobs.map((job) => {
-            const checked = selectedIds.includes(job.id);
-
-            return (
-              <label
-                key={job.id}
-                className="flex min-h-10 items-center gap-3 rounded-[var(--radius-card)] border border-border bg-surface px-3 py-2"
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={(event) => {
-                    if (event.target.checked) {
-                      onChange([...selectedIds, job.id]);
-                      return;
-                    }
-
-                    onChange(selectedIds.filter((id) => id !== job.id));
-                  }}
-                />
-                <span className="min-w-0 flex-1">
-                  <Typography variant="small" className="truncate">
-                    {job.companyName} · {job.postingTitle}
-                  </Typography>
-                </span>
-                {job.isArchived ? <Badge variant="archive">Archive</Badge> : null}
-              </label>
-            );
-          })}
-        </div>
-      ) : (
-        <Typography variant="small" tone="secondary">
-          연결할 공고가 없습니다.
-        </Typography>
-      )}
-      <div className="flex flex-wrap gap-2">
-        {selectedJobs.length > 0 ? (
-          selectedJobs.map((job) => (
-            <Badge key={job.id} variant={job.isArchived ? 'archive' : 'primary'}>
-              {job.companyName}
-              {job.isArchived ? ' · Archive' : ''}
-            </Badge>
-          ))
         ) : (
-          <Typography variant="caption" tone="secondary">
-            연결된 공고가 없습니다.
-          </Typography>
+          <ul className="list-disc space-y-1 pl-5">
+            {items.map((item) => (
+              <li key={item}>
+                <Typography variant="small">{item}</Typography>
+              </li>
+            ))}
+          </ul>
         )}
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }
 
-function SaveStatusText({
-  status,
-  isDirty,
-}: {
-  status?: ExperienceSaveStatus;
-  isDirty: boolean;
-}) {
-  if (status?.state === 'saving') {
-    return (
-      <Typography variant="caption" className="text-primary">
-        저장 중...
-      </Typography>
-    );
-  }
-
-  if (status?.state === 'error') {
-    return (
-      <Typography variant="caption" className="text-danger">
-        저장하지 못했습니다.
-      </Typography>
-    );
-  }
-
-  if (isDirty) {
-    return (
-      <Typography variant="caption" tone="secondary">
-        저장 대기 중...
-      </Typography>
-    );
-  }
-
-  if (status?.state === 'saved' && status.savedAt) {
-    return (
-      <Typography variant="caption" className="text-success">
-        저장 완료 · {formatTime(status.savedAt)}
-      </Typography>
-    );
-  }
-
-  return (
-    <Typography variant="caption" tone="secondary">
-      저장 준비 완료
-    </Typography>
-  );
-}
-
-function experienceToDraft(experience: Experience): ExperienceDraft {
+function reportToDraft(report: ExperienceReport): ExperienceReportDraft {
   return {
-    title: experience.title,
-    situation: experience.situation,
-    task: experience.task,
-    action: experience.action,
-    result: experience.result,
-    measurableOutcome: experience.measurableOutcome,
-    competencyTags: experience.competencyTags,
-    relatedJobIds: experience.relatedJobIds,
-    memo: experience.memo,
+    oneLiner: report.oneLiner,
+    strengths: report.strengths,
+    weaknesses: report.weaknesses,
+    personality: report.personality,
+    recommendedRoles: report.recommendedRoles,
+    recommendedCompanyTypes: report.recommendedCompanyTypes,
+    recommendedExperiences: report.recommendedExperiences,
+    recommendedEssays: report.recommendedEssays,
+    expectedQuestionsText: report.expectedQuestions.join('\n'),
+    followUpQuestionsText: report.followUpQuestions.join('\n'),
+    pressureQuestionsText: report.pressureQuestions.join('\n'),
+    answerImprovements: report.answerImprovements,
+    careerStrategy: report.careerStrategy,
+    interviewReadiness: report.interviewReadiness,
+    careerReadiness: report.careerReadiness,
+    aiOpinion: report.aiOpinion,
+    suggestedAdditionalData: report.suggestedAdditionalData,
   };
-}
-
-function draftToInput(draft: ExperienceDraft): CreateExperienceInput {
-  return {
-    title: draft.title.trim(),
-    situation: draft.situation,
-    task: draft.task,
-    action: draft.action,
-    result: draft.result,
-    measurableOutcome: draft.measurableOutcome,
-    competencyTags: draft.competencyTags,
-    relatedJobIds: draft.relatedJobIds,
-    memo: draft.memo,
-  };
-}
-
-function getRelatedJobs(experience: Experience, jobs: Job[]) {
-  return jobs.filter((job) => experience.relatedJobIds.includes(job.id));
-}
-
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat('ko-KR', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
-}
-
-function formatTime(value: string) {
-  return new Intl.DateTimeFormat('ko-KR', {
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(value));
 }
 
 export { ExperiencePage };

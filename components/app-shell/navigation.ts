@@ -32,7 +32,7 @@ export const desktopNavigationItems: NavigationItem[] = [
     icon: BriefcaseBusiness,
   },
   {
-    label: '경험 라이브러리',
+    label: 'AI Experience',
     href: '/experience',
     icon: BookOpenText,
   },
@@ -78,7 +78,7 @@ export const mobileMoreNavigationItems: NavigationItem[] = [
     icon: Search,
   },
   {
-    label: '경험 라이브러리',
+    label: 'AI Experience',
     href: '/experience',
     icon: BookOpenText,
   },

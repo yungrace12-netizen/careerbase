@@ -1,4 +1,5 @@
 import type { CompanyResearch } from '@/types/company-research';
+import type { ExperienceReport } from '@/types/experience-report';
 import type { InterviewCoachImport } from '@/types/interview-coach';
 import type { Job } from '@/types/job';
 import type {
@@ -37,6 +38,7 @@ export interface CareerBaseData {
   interviews: InterviewStage[];
   companyResearch: CompanyResearch[];
   interviewCoachImports: InterviewCoachImport[];
+  experienceReports: ExperienceReport[];
   profile: Profile;
   experiences: Experience[];
   todos: [];

@@ -24,7 +24,9 @@ function AppShell({ children }: AppShellProps) {
   const [jobFormOpen, setJobFormOpen] = React.useState(false);
   const [createToastOpen, setCreateToastOpen] = React.useState(false);
   const currentNavigationItem = getCurrentNavigationItem(pathname);
-  const isPrintRoute = pathname.includes('/interview-print');
+  const isPrintRoute =
+    pathname.includes('/interview-print') ||
+    pathname.includes('/experience/print');
 
   const handleCreateJob = (input: CreateJobInput) => {
     createJob(input);
