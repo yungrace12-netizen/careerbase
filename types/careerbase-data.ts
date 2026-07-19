@@ -1,3 +1,5 @@
+import type { CompanyResearch } from '@/types/company-research';
+import type { InterviewCoachImport } from '@/types/interview-coach';
 import type { Job } from '@/types/job';
 import type {
   AttachmentMetadata,
@@ -33,6 +35,8 @@ export interface CareerBaseData {
   schedules: Schedule[];
   essays: Essay[];
   interviews: InterviewStage[];
+  companyResearch: CompanyResearch[];
+  interviewCoachImports: InterviewCoachImport[];
   profile: Profile;
   experiences: Experience[];
   todos: [];

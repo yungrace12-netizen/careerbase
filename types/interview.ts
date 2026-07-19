@@ -7,6 +7,9 @@ export interface InterviewQuestion {
   question: string;
   answer: string;
   experienceIds: EntityId[];
+  followUpQuestions?: string[];
+  sourceReason?: string;
+  aiGenerated?: boolean;
 
   createdAt: string;
   updatedAt: string;

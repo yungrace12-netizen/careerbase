@@ -17,6 +17,8 @@ function createInitialData(now = new Date().toISOString()): CareerBaseData {
     schedules: [],
     essays: [],
     interviews: [],
+    companyResearch: [],
+    interviewCoachImports: [],
     profile: {
       personalInfo: {
         name: '',
@@ -86,6 +88,12 @@ function readData(): CareerBaseData {
       essays: Array.isArray(parsedData.essays) ? parsedData.essays : [],
       interviews: Array.isArray(parsedData.interviews)
         ? parsedData.interviews
+        : [],
+      companyResearch: Array.isArray(parsedData.companyResearch)
+        ? parsedData.companyResearch
+        : [],
+      interviewCoachImports: Array.isArray(parsedData.interviewCoachImports)
+        ? parsedData.interviewCoachImports
         : [],
       experiences: Array.isArray(parsedData.experiences)
         ? parsedData.experiences

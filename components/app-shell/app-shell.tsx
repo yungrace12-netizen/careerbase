@@ -24,11 +24,16 @@ function AppShell({ children }: AppShellProps) {
   const [jobFormOpen, setJobFormOpen] = React.useState(false);
   const [createToastOpen, setCreateToastOpen] = React.useState(false);
   const currentNavigationItem = getCurrentNavigationItem(pathname);
+  const isPrintRoute = pathname.includes('/interview-print');
 
   const handleCreateJob = (input: CreateJobInput) => {
     createJob(input);
     setCreateToastOpen(true);
   };
+
+  if (isPrintRoute) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="flex min-h-dvh bg-background text-foreground">

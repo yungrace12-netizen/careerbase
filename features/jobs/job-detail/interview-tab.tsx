@@ -1,9 +1,11 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import {
   ArrowDown,
   ArrowUp,
+  FileDown,
   GripVertical,
   Pencil,
   Plus,
@@ -43,6 +45,8 @@ import { Modal } from '@/components/ui/modal';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Typography } from '@/components/ui/typography';
+import { AiInterviewCoachPanel } from '@/features/jobs/job-detail/ai-interview-coach-panel';
+import { CompanyResearchPanel } from '@/features/jobs/job-detail/company-research-panel';
 import {
   saveStatusKey,
   useInterviewStore,
@@ -61,7 +65,7 @@ import {
 } from '@/types/interview';
 import type { EntityId, Job } from '@/types/job';
 
-type InterviewSubTab = 'prepare' | 'completed';
+type InterviewSubTab = 'company' | 'prepare' | 'completed';
 type QuestionModalType = 'expected' | 'actual';
 
 interface InterviewTabProps {
@@ -139,7 +143,7 @@ function InterviewTab({ job }: InterviewTabProps) {
     null,
   );
   const [activeSubTab, setActiveSubTab] =
-    React.useState<InterviewSubTab>('prepare');
+    React.useState<InterviewSubTab>('company');
   const [stageModal, setStageModal] = React.useState<StageModalState | null>(
     null,
   );
@@ -289,33 +293,46 @@ function InterviewTab({ job }: InterviewTabProps) {
 
   if (stages.length === 0) {
     return (
-      <InterviewEmptyState
-        onCreateDefault={() => createDefaultStages(job.id)}
-        onCreateCustom={openCreateStageModal}
-        stageModal={stageModal}
-        onStageModalChange={setStageModal}
-        onSubmitStage={handleSubmitStage}
-      />
+      <div className="grid gap-4">
+        <InterviewTabHeader
+          jobId={job.id}
+          onCreateStage={openCreateStageModal}
+          showCreateStage
+        />
+        <InterviewSubTabNav
+          activeSubTab={activeSubTab}
+          onChange={setActiveSubTab}
+        />
+        {activeSubTab === 'company' ? (
+          <CompanyResearchPanel jobId={job.id} />
+        ) : (
+          <InterviewEmptyState
+            onCreateDefault={() => createDefaultStages(job.id)}
+            onCreateCustom={openCreateStageModal}
+            stageModal={null}
+            onStageModalChange={setStageModal}
+            onSubmitStage={handleSubmitStage}
+          />
+        )}
+        <StageModal
+          state={stageModal}
+          onStateChange={setStageModal}
+          onSubmit={handleSubmitStage}
+        />
+      </div>
     );
   }
 
   return (
     <div className="grid gap-4">
-      <Card className="shrink-0">
-        <div className="grid gap-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <CardTitle>면접</CardTitle>
-              <CardDescription className="mt-2">
-                면접 단계별 준비와 완료 기록을 관리합니다.
-              </CardDescription>
-            </div>
-            <Button type="button" onClick={openCreateStageModal}>
-              <Plus className="size-4" aria-hidden />
-              단계 추가
-            </Button>
-          </div>
+      <InterviewTabHeader
+        jobId={job.id}
+        onCreateStage={openCreateStageModal}
+        showCreateStage
+      />
 
+      <Card>
+        <div className="grid gap-4">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -340,7 +357,14 @@ function InterviewTab({ job }: InterviewTabProps) {
         </div>
       </Card>
 
-      {selectedStage ? (
+      <InterviewSubTabNav
+        activeSubTab={activeSubTab}
+        onChange={setActiveSubTab}
+      />
+
+      {activeSubTab === 'company' ? (
+        <CompanyResearchPanel jobId={job.id} />
+      ) : selectedStage ? (
         <>
           <StageSummaryCard
             stage={selectedStage}
@@ -355,32 +379,9 @@ function InterviewTab({ job }: InterviewTabProps) {
             }
           />
 
-          <nav
-            className="flex gap-2 overflow-x-auto border-b border-border pb-2"
-            aria-label="Interview sub tabs"
-          >
-            {[
-              { id: 'prepare', label: '면접 준비' },
-              { id: 'completed', label: '면접 완료' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                aria-pressed={activeSubTab === tab.id}
-                onClick={() => setActiveSubTab(tab.id as InterviewSubTab)}
-                className={
-                  activeSubTab === tab.id
-                    ? 'shrink-0 rounded-[var(--radius-button)] bg-primary px-4 py-2 text-[length:var(--text-small)] font-medium text-primary-foreground'
-                    : 'shrink-0 rounded-[var(--radius-button)] px-4 py-2 text-[length:var(--text-small)] font-medium text-text-secondary transition-colors hover:bg-muted hover:text-text-primary'
-                }
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-
           {activeSubTab === 'prepare' ? (
             <InterviewPreparePanel
+              jobId={job.id}
               stage={selectedStage}
               experiences={experiences}
               saveStatuses={saveStatuses}
@@ -390,6 +391,14 @@ function InterviewTab({ job }: InterviewTabProps) {
                   stageId: selectedStage.id,
                   questionId: null,
                   question: '',
+                })
+              }
+              onAddAiQuestion={(input) =>
+                addExpectedQuestion(selectedStage.id, input.question, job.id, {
+                  answer: input.answer,
+                  followUpQuestions: input.followUpQuestions,
+                  sourceReason: input.sourceReason,
+                  aiGenerated: true,
                 })
               }
               onEditQuestion={(question) =>
@@ -576,6 +585,78 @@ function InterviewEmptyState({
   );
 }
 
+function InterviewTabHeader({
+  jobId,
+  onCreateStage,
+  showCreateStage,
+}: {
+  jobId: EntityId;
+  onCreateStage: () => void;
+  showCreateStage: boolean;
+}) {
+  return (
+    <Card>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <CardTitle>면접</CardTitle>
+          <CardDescription className="mt-2">
+            회사정보와 면접 단계별 준비·완료 기록을 관리합니다.
+          </CardDescription>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link href={`/jobs/${jobId}/interview-print`}>
+            <Button type="button" variant="secondary">
+              <FileDown className="size-4" aria-hidden />
+              PDF로 저장
+            </Button>
+          </Link>
+          {showCreateStage ? (
+            <Button type="button" onClick={onCreateStage}>
+              <Plus className="size-4" aria-hidden />
+              단계 추가
+            </Button>
+          ) : null}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function InterviewSubTabNav({
+  activeSubTab,
+  onChange,
+}: {
+  activeSubTab: InterviewSubTab;
+  onChange: (tab: InterviewSubTab) => void;
+}) {
+  return (
+    <nav
+      className="flex gap-2 overflow-x-auto border-b border-border pb-2"
+      aria-label="Interview sub tabs"
+    >
+      {[
+        { id: 'company', label: '회사정보' },
+        { id: 'prepare', label: '면접준비' },
+        { id: 'completed', label: '면접완료' },
+      ].map((tab) => (
+        <button
+          key={tab.id}
+          type="button"
+          aria-pressed={activeSubTab === tab.id}
+          onClick={() => onChange(tab.id as InterviewSubTab)}
+          className={
+            activeSubTab === tab.id
+              ? 'shrink-0 rounded-[var(--radius-button)] bg-primary px-4 py-2 text-[length:var(--text-small)] font-medium text-primary-foreground'
+              : 'shrink-0 rounded-[var(--radius-button)] px-4 py-2 text-[length:var(--text-small)] font-medium text-text-secondary transition-colors hover:bg-muted hover:text-text-primary'
+          }
+        >
+          {tab.label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 function SortableStageButton({
   stage,
   selected,
@@ -705,19 +786,28 @@ function StageSummaryCard({
 }
 
 function InterviewPreparePanel({
+  jobId,
   stage,
   experiences,
   saveStatuses,
   onAddQuestion,
+  onAddAiQuestion,
   onEditQuestion,
   onDeleteQuestion,
   onSaveAnswer,
   onExperienceIdsChange,
 }: {
+  jobId: EntityId;
   stage: InterviewStage;
   experiences: Experience[];
   saveStatuses: Record<string, InterviewSaveStatus>;
   onAddQuestion: () => void;
+  onAddAiQuestion: (input: {
+    question: string;
+    answer: string;
+    followUpQuestions: string[];
+    sourceReason: string;
+  }) => void;
   onEditQuestion: (question: InterviewQuestion) => void;
   onDeleteQuestion: (questionId: EntityId) => void;
   onSaveAnswer: (questionId: EntityId, answer: string) => void;
@@ -728,7 +818,9 @@ function InterviewPreparePanel({
 }) {
   return (
     <div className="grid gap-4">
-      <Card className="shrink-0">
+      <AiInterviewCoachPanel jobId={jobId} onAddQuestion={onAddAiQuestion} />
+
+      <Card>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <CardTitle>예상 질문</CardTitle>
@@ -896,11 +988,23 @@ function ExpectedQuestionCard({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="primary">예상 질문 {number}</Badge>
+              {question.aiGenerated ? (
+                <Badge variant="default">AI 생성</Badge>
+              ) : null}
               <SaveStatusText status={saveStatus} isDirty={isDirty} />
             </div>
             <CardTitle className="mt-3 whitespace-pre-wrap">
               {question.question}
             </CardTitle>
+            {question.sourceReason ? (
+              <Typography
+                variant="caption"
+                tone="secondary"
+                className="mt-2 block whitespace-pre-wrap"
+              >
+                생성 근거: {question.sourceReason}
+              </Typography>
+            ) : null}
           </div>
           <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Button type="button" variant="secondary" onClick={onEdit}>
@@ -922,6 +1026,20 @@ function ExpectedQuestionCard({
           className="min-h-56"
           placeholder="예상 답변을 입력하세요."
         />
+        {question.followUpQuestions && question.followUpQuestions.length > 0 ? (
+          <div className="mt-4">
+            <Typography variant="caption" tone="secondary">
+              꼬리 질문
+            </Typography>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              {question.followUpQuestions.map((followUp) => (
+                <li key={followUp}>
+                  <Typography variant="small">{followUp}</Typography>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <div className="flex justify-end">
           <Button
             type="button"

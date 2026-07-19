@@ -160,13 +160,22 @@ function reorderInterviewStages(jobId: EntityId, orderedIds: EntityId[]): void {
 function addExpectedQuestion(
   stageId: EntityId,
   question: string,
+  extras?: Partial<
+    Pick<
+      InterviewQuestion,
+      'answer' | 'followUpQuestions' | 'sourceReason' | 'aiGenerated'
+    >
+  >,
 ): InterviewStage | null {
   const now = new Date().toISOString();
   const interviewQuestion: InterviewQuestion = {
     id: crypto.randomUUID(),
     question,
-    answer: '',
+    answer: extras?.answer ?? '',
     experienceIds: [],
+    followUpQuestions: extras?.followUpQuestions,
+    sourceReason: extras?.sourceReason,
+    aiGenerated: extras?.aiGenerated,
     createdAt: now,
     updatedAt: now,
   };
@@ -181,7 +190,17 @@ function addExpectedQuestion(
 function updateExpectedQuestion(
   stageId: EntityId,
   questionId: EntityId,
-  input: Partial<Pick<InterviewQuestion, 'question' | 'answer' | 'experienceIds'>>,
+  input: Partial<
+    Pick<
+      InterviewQuestion,
+      | 'question'
+      | 'answer'
+      | 'experienceIds'
+      | 'followUpQuestions'
+      | 'sourceReason'
+      | 'aiGenerated'
+    >
+  >,
 ): InterviewStage | null {
   const now = new Date().toISOString();
 

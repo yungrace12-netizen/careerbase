@@ -36,7 +36,17 @@ interface InterviewStore {
     status: InterviewStatus,
     jobId: EntityId,
   ) => void;
-  addExpectedQuestion: (stageId: EntityId, question: string, jobId: EntityId) => void;
+  addExpectedQuestion: (
+    stageId: EntityId,
+    question: string,
+    jobId: EntityId,
+    extras?: Partial<
+      Pick<
+        InterviewStage['expectedQuestions'][number],
+        'answer' | 'followUpQuestions' | 'sourceReason' | 'aiGenerated'
+      >
+    >,
+  ) => void;
   updateExpectedQuestion: (
     stageId: EntityId,
     questionId: EntityId,
@@ -211,8 +221,8 @@ export const useInterviewStore = create<InterviewStore>((set, get) => ({
     interviewRepository.updateInterviewStage(id, { status });
     set(loadJobScopedData(jobId));
   },
-  addExpectedQuestion: (stageId, question, jobId) => {
-    interviewRepository.addExpectedQuestion(stageId, question);
+  addExpectedQuestion: (stageId, question, jobId, extras) => {
+    interviewRepository.addExpectedQuestion(stageId, question, extras);
     set(loadJobScopedData(jobId));
   },
   updateExpectedQuestion: (stageId, questionId, question, jobId) => {
