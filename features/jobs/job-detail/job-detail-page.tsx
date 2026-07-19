@@ -29,6 +29,7 @@ import { JobFormModal } from '../job-form-modal';
 import { ApplicationsTab } from './applications-tab';
 import { EssayTab } from './essay-tab';
 import { InterviewTab } from './interview-tab';
+import { ScheduleTab } from './schedule-tab';
 
 interface JobDetailPageProps {
   jobId: string;
@@ -159,6 +160,8 @@ function JobDetailPage({ jobId, initialTab = 'info' }: JobDetailPageProps) {
                 <EssayTab job={job} />
               ) : activeTab === 'interview' ? (
                 <InterviewTab job={job} />
+              ) : activeTab === 'schedule' ? (
+                <ScheduleTab job={job} />
               ) : activeTab === 'application' ? (
                 <ApplicationsTab
                   job={job}

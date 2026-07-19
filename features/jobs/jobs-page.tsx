@@ -3,20 +3,13 @@
 import * as React from 'react';
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Modal } from '@/components/ui/modal';
-import { Toast, ToastViewport } from '@/components/ui/toast';
-import { Typography } from '@/components/ui/typography';
-import {
   Container,
   ContentWrapper,
   PageWrapper,
 } from '@/components/layout';
+import { Modal } from '@/components/ui/modal';
+import { Toast, ToastViewport } from '@/components/ui/toast';
+import { Typography } from '@/components/ui/typography';
 import { useJobStore } from '@/stores/jobStore';
 import type { CreateJobInput, Job } from '@/types/job';
 import { JobFormModal } from './job-form-modal';
@@ -74,27 +67,11 @@ function JobsPage() {
     <PageWrapper>
       <Container>
         <ContentWrapper>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
-            <JobsList
-              jobs={jobs}
-              onEdit={openEditModal}
-              onArchive={setArchiveTarget}
-            />
-
-            <Card className="hidden lg:flex">
-              <CardHeader>
-                <CardTitle>공고 상세</CardTitle>
-                <CardDescription>목록에서 공고를 선택하면 상세 화면으로 이동합니다.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex min-h-80 items-center justify-center rounded-[var(--radius-card)] border border-border bg-background p-6 text-center">
-                  <Typography variant="body" tone="secondary">
-                    왼쪽 목록에서 공고를 선택해주세요.
-                  </Typography>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <JobsList
+            jobs={jobs}
+            onEdit={openEditModal}
+            onArchive={setArchiveTarget}
+          />
         </ContentWrapper>
       </Container>
 

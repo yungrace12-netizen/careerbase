@@ -16,7 +16,10 @@ import type { DateClickArg } from '@fullcalendar/interaction';
 import { Typography } from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
 import type { CalendarSchedule } from '@/features/calendar/calendar-data';
-import { getExactSchedules } from '@/features/calendar/calendar-data';
+import {
+  getCalendarCellTypeLabel,
+  getExactSchedules,
+} from '@/features/calendar/calendar-data';
 
 interface CareerBaseCalendarProps {
   schedules: CalendarSchedule[];
@@ -48,7 +51,7 @@ function CareerBaseCalendar({
     () =>
       eventSchedules.map((schedule) => ({
         id: schedule.id,
-        title: `${schedule.type} - ${schedule.companyName}`,
+        title: `${getCalendarCellTypeLabel(schedule.type)} - ${schedule.companyName}`,
         date: schedule.date ?? undefined,
         extendedProps: {
           schedule,
@@ -98,7 +101,7 @@ function CareerBaseCalendar({
           )}
         >
           <span className="shrink-0 text-[length:var(--text-caption)] font-semibold">
-            {schedule.type}
+            {getCalendarCellTypeLabel(schedule.type)}
           </span>
           <span className="shrink-0 text-[length:var(--text-caption)]">
             -

@@ -1,6 +1,7 @@
 import { readData } from '@/repositories/careerbaseStorage';
 import {
   createDdayInfo,
+  getScheduleTimelineOrder,
   type CalendarSchedule,
   type CalendarSchedulePrecision,
   type CalendarScheduleType,
@@ -36,6 +37,38 @@ function getCalendarSchedules(): CalendarSchedule[] {
   ];
 
   return sortCalendarSchedules(dedupeSchedules(generatedSchedules));
+}
+
+function getCalendarSchedulesByJobId(jobId: string): CalendarSchedule[] {
+  const data = readData();
+  const job = data.jobs.find((item) => item.id === jobId);
+
+  if (!job) {
+    return [];
+  }
+
+  const schedulesById = new Map(
+    data.schedules.map((schedule) => [schedule.id, schedule]),
+  );
+  const generatedSchedules = [
+    ...jobToCalendarSchedules(job),
+    ...data.schedules
+      .filter((schedule) => schedule.jobId === jobId)
+      .map((schedule) => sourceScheduleToCalendarSchedule(schedule, job))
+      .filter((schedule): schedule is CalendarSchedule => Boolean(schedule)),
+    ...data.interviews
+      .filter((stage) => stage.jobId === jobId)
+      .map((stage) =>
+        interviewStageToCalendarSchedule(
+          stage,
+          job,
+          schedulesById.get(stage.scheduleId ?? ''),
+        ),
+      )
+      .filter((schedule): schedule is CalendarSchedule => Boolean(schedule)),
+  ];
+
+  return sortCalendarSchedulesByProgress(dedupeSchedules(generatedSchedules));
 }
 
 function jobToCalendarSchedules(job: Job): CalendarSchedule[] {
@@ -219,6 +252,38 @@ function sortCalendarSchedules(schedules: CalendarSchedule[]) {
   });
 }
 
+function sortCalendarSchedulesByProgress(schedules: CalendarSchedule[]) {
+  return [...schedules].sort((a, b) => {
+    const orderCompare =
+      getScheduleTimelineOrder(a.type) - getScheduleTimelineOrder(b.type);
+
+    if (orderCompare !== 0) {
+      return orderCompare;
+    }
+
+    if (!a.date && !b.date) {
+      return 0;
+    }
+
+    if (!a.date) {
+      return 1;
+    }
+
+    if (!b.date) {
+      return -1;
+    }
+
+    const dateCompare = a.date.localeCompare(b.date);
+
+    if (dateCompare !== 0) {
+      return dateCompare;
+    }
+
+    return (a.time ?? '').localeCompare(b.time ?? '');
+  });
+}
+
 export const calendarRepository = {
   getCalendarSchedules,
+  getCalendarSchedulesByJobId,
 };

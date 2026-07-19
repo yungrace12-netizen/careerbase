@@ -68,6 +68,51 @@ export function getSchedulesByMonth(
   );
 }
 
+const calendarCellTypeLabels: Record<CalendarScheduleType, string> = {
+  '지원 시작': '시작',
+  '지원 마감': '마감',
+  '서류 발표': '서류',
+  '인적성 발표': '인적성',
+  '1차 면접': '1차',
+  '2차 면접': '2차',
+  '기타 면접': '기타',
+  '최종 발표': '최종',
+};
+
+const scheduleTimelineOrder: Record<CalendarScheduleType, number> = {
+  '지원 시작': 0,
+  '지원 마감': 1,
+  '서류 발표': 2,
+  '인적성 발표': 3,
+  '1차 면접': 4,
+  '2차 면접': 5,
+  '기타 면접': 6,
+  '최종 발표': 7,
+};
+
+const scheduleTimelineLabels: Record<CalendarScheduleType, string> = {
+  '지원 시작': '지원 시작',
+  '지원 마감': '지원 마감',
+  '서류 발표': '서류 발표',
+  '인적성 발표': '인적성',
+  '1차 면접': '1차 면접',
+  '2차 면접': '2차 면접',
+  '기타 면접': '기타 면접',
+  '최종 발표': '최종 발표',
+};
+
+export function getCalendarCellTypeLabel(type: CalendarScheduleType) {
+  return calendarCellTypeLabels[type];
+}
+
+export function getScheduleTimelineLabel(type: CalendarScheduleType) {
+  return scheduleTimelineLabels[type];
+}
+
+export function getScheduleTimelineOrder(type: CalendarScheduleType) {
+  return scheduleTimelineOrder[type];
+}
+
 export function createDdayInfo(date: string, today = new Date()) {
   const todayDate = new Date(
     today.getFullYear(),
