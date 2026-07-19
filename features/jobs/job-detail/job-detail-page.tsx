@@ -121,18 +121,18 @@ function JobDetailPage({ jobId, initialTab = 'info' }: JobDetailPageProps) {
   }
 
   return (
-    <PageWrapper className="lg:h-[calc(100dvh-4rem)] lg:overflow-hidden">
-      <Container className="lg:h-full">
-        <ContentWrapper className="lg:h-full lg:overflow-hidden">
+    <PageWrapper>
+      <Container>
+        <ContentWrapper>
           <JobDetailHeader
             job={job}
             onEdit={() => setEditOpen(true)}
             onArchive={() => setArchiveOpen(true)}
           />
 
-          <section className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
+          <section className="flex flex-col gap-4">
             <nav
-              className="flex shrink-0 gap-2 overflow-x-auto border-b border-border pb-2"
+              className="flex gap-2 overflow-x-auto border-b border-border pb-2"
               aria-label="Job detail tabs"
             >
               {tabs.map((tab) => (
@@ -152,7 +152,7 @@ function JobDetailPage({ jobId, initialTab = 'info' }: JobDetailPageProps) {
               ))}
             </nav>
 
-            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+            <div>
               {activeTab === 'info' ? (
                 <JobInfoTab job={job} />
               ) : activeTab === 'essay' ? (
@@ -207,7 +207,7 @@ function JobDetailHeader({
   onArchive: () => void;
 }) {
   return (
-    <Card className="shrink-0">
+    <Card>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <Link

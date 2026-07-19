@@ -149,7 +149,7 @@ function ApplicationsTab({ job, onStatusChange }: ApplicationsTabProps) {
   const timeline = getTimelineItems(job);
 
   return (
-    <div className="grid gap-4 lg:h-full lg:grid-rows-[auto_minmax(0,1fr)]">
+    <div className="grid gap-4">
       <Card>
         <CardHeader>
           <CardTitle>지원현황</CardTitle>
@@ -185,12 +185,12 @@ function ApplicationsTab({ job, onStatusChange }: ApplicationsTabProps) {
         </CardContent>
       </Card>
 
-      <Card className="min-h-0 overflow-hidden">
-        <CardHeader className="shrink-0">
+      <Card>
+        <CardHeader>
           <CardTitle>Timeline</CardTitle>
           <CardDescription>완료, 현재, 예정 단계를 구분합니다.</CardDescription>
         </CardHeader>
-        <CardContent className="min-h-0 flex-1 overflow-y-auto pr-1">
+        <CardContent>
           <ol className="grid gap-3">
             {timeline.map((item, index) => (
               <TimelineListItem
