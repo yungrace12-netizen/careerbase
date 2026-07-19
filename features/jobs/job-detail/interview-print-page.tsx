@@ -13,6 +13,7 @@ import { interviewCoachImportRepository } from '@/repositories/interviewCoachImp
 import { interviewRepository } from '@/repositories/interviewRepository';
 import { jobRepository } from '@/repositories/jobRepository';
 import type { CompanyResearch } from '@/types/company-research';
+import { getCompanyResearchDisplayContent } from '@/types/company-research';
 import type { Experience } from '@/types/essay';
 import type { InterviewCoachImport } from '@/types/interview-coach';
 import type { InterviewStage } from '@/types/interview';
@@ -144,20 +145,9 @@ function CompanyResearchPrintSection({
 }: {
   research: CompanyResearch | null;
 }) {
-  const fields = [
-    { label: 'Mission', value: research?.mission },
-    { label: 'Vision', value: research?.vision },
-    { label: '핵심가치', value: research?.coreValues },
-    { label: '인재상', value: research?.talentProfile },
-    { label: '주요 사업', value: research?.mainBusiness },
-    { label: '회사 이해', value: research?.companyOverview },
-    { label: '최근 이슈', value: research?.recentIssues },
-    { label: '직무 연결점', value: research?.jobConnection },
-    { label: '기여 가능 부분', value: research?.expectedContribution },
-    { label: '메모', value: research?.memo },
-  ].filter((field) => Boolean(field.value?.trim()));
+  const content = getCompanyResearchDisplayContent(research).trim();
 
-  if (fields.length === 0) {
+  if (!content) {
     return null;
   }
 
@@ -166,11 +156,12 @@ function CompanyResearchPrintSection({
       <Typography as="h2" variant="section" className="text-black">
         회사정보
       </Typography>
-      <div className="mt-4 grid gap-5">
-        {fields.map((field) => (
-          <PrintBlock key={field.label} label={field.label} value={field.value!} />
-        ))}
-      </div>
+      <Typography
+        variant="small"
+        className="mt-4 whitespace-pre-wrap text-black"
+      >
+        {content}
+      </Typography>
     </section>
   );
 }

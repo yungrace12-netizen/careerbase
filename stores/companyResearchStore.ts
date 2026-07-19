@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 
 import { companyResearchRepository } from '@/repositories/companyResearchRepository';
-import type {
-  CompanyResearch,
-  UpdateCompanyResearchInput,
+import {
+  composeCompanyResearchContent,
+  type CompanyResearch,
+  type UpdateCompanyResearchInput,
 } from '@/types/company-research';
 import type { EntityId } from '@/types/job';
 
@@ -29,13 +30,38 @@ const defaultSaveStatus: CompanyResearchSaveStatus = {
   savedAt: null,
 };
 
+function hydrateCompanyResearch(jobId: EntityId): CompanyResearch | null {
+  const research =
+    companyResearchRepository.getCompanyResearchByJobId(jobId);
+
+  if (!research) {
+    return null;
+  }
+
+  if (research.content?.trim()) {
+    return research;
+  }
+
+  const composed = composeCompanyResearchContent(research);
+
+  if (!composed) {
+    return research;
+  }
+
+  return (
+    companyResearchRepository.upsertCompanyResearch(jobId, {
+      content: composed,
+    }) ?? research
+  );
+}
+
 export const useCompanyResearchStore = create<CompanyResearchStore>(
   (set) => ({
     research: null,
     saveStatus: defaultSaveStatus,
     loadByJobId: (jobId) => {
       set({
-        research: companyResearchRepository.getCompanyResearchByJobId(jobId),
+        research: hydrateCompanyResearch(jobId),
         saveStatus: defaultSaveStatus,
       });
     },

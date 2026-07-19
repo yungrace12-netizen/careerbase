@@ -136,6 +136,8 @@ function buildInterviewCoachPrompt(jobId: EntityId): string | null {
   sections.push('## 회사정보');
   if (!companyResearch) {
     sections.push('(입력된 회사정보 없음)');
+  } else if (companyResearch.content?.trim()) {
+    sections.push(companyResearch.content.trim());
   } else {
     sections.push(`Mission: ${valueOrEmpty(companyResearch.mission)}`);
     sections.push(`Vision: ${valueOrEmpty(companyResearch.vision)}`);

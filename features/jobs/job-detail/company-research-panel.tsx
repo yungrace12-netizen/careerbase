@@ -14,11 +14,9 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Toast, ToastViewport } from '@/components/ui/toast';
 import { Typography } from '@/components/ui/typography';
-import { companyResearchRepository } from '@/repositories/companyResearchRepository';
 import {
-  createEmptyCompanyResearchFields,
-  type CompanyResearch,
-  type UpdateCompanyResearchInput,
+  COMPANY_RESEARCH_CONTENT_PLACEHOLDER,
+  getCompanyResearchDisplayContent,
 } from '@/types/company-research';
 import type { EntityId } from '@/types/job';
 import {
@@ -30,40 +28,6 @@ interface CompanyResearchPanelProps {
   jobId: EntityId;
 }
 
-type CompanyResearchDraft = UpdateCompanyResearchInput;
-
-const fieldConfigs: Array<{
-  key: keyof CompanyResearchDraft;
-  label: string;
-}> = [
-  { key: 'mission', label: 'Mission' },
-  { key: 'vision', label: 'Vision' },
-  { key: 'coreValues', label: '핵심가치' },
-  { key: 'talentProfile', label: '인재상' },
-  { key: 'mainBusiness', label: '주요 사업' },
-  { key: 'companyOverview', label: '회사 및 조직 이해' },
-  { key: 'recentIssues', label: '최근 주요 이슈' },
-  { key: 'jobConnection', label: '지원 직무와 회사의 연결점' },
-  { key: 'expectedContribution', label: '내가 기여할 수 있는 부분' },
-  { key: 'memo', label: '자유 메모' },
-];
-
-function toDraft(research: CompanyResearch | null): CompanyResearchDraft {
-  return {
-    ...createEmptyCompanyResearchFields(),
-    mission: research?.mission ?? '',
-    vision: research?.vision ?? '',
-    coreValues: research?.coreValues ?? '',
-    talentProfile: research?.talentProfile ?? '',
-    mainBusiness: research?.mainBusiness ?? '',
-    companyOverview: research?.companyOverview ?? '',
-    recentIssues: research?.recentIssues ?? '',
-    jobConnection: research?.jobConnection ?? '',
-    expectedContribution: research?.expectedContribution ?? '',
-    memo: research?.memo ?? '',
-  };
-}
-
 function CompanyResearchPanel({ jobId }: CompanyResearchPanelProps) {
   return <CompanyResearchEditor key={jobId} jobId={jobId} />;
 }
@@ -73,21 +37,26 @@ function CompanyResearchEditor({ jobId }: CompanyResearchPanelProps) {
   const loadByJobId = useCompanyResearchStore((state) => state.loadByJobId);
   const saveResearch = useCompanyResearchStore((state) => state.saveResearch);
 
-  const [draft, setDraft] = React.useState<CompanyResearchDraft>(() =>
-    toDraft(companyResearchRepository.getCompanyResearchByJobId(jobId)),
-  );
-  const [baseline, setBaseline] = React.useState<CompanyResearchDraft>(() =>
-    toDraft(companyResearchRepository.getCompanyResearchByJobId(jobId)),
-  );
+  const [draft, setDraft] = React.useState('');
+  const [baseline, setBaseline] = React.useState('');
+  const [ready, setReady] = React.useState(false);
   const [toastOpen, setToastOpen] = React.useState(false);
 
   React.useEffect(() => {
     loadByJobId(jobId);
+
+    const timeoutId = window.setTimeout(() => {
+      const research = useCompanyResearchStore.getState().research;
+      const text = getCompanyResearchDisplayContent(research);
+      setDraft(text);
+      setBaseline(text);
+      setReady(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [jobId, loadByJobId]);
 
-  const isDirty = fieldConfigs.some(
-    ({ key }) => (draft[key] ?? '') !== (baseline[key] ?? ''),
-  );
+  const isDirty = ready && draft !== baseline;
 
   React.useEffect(() => {
     if (!isDirty) {
@@ -95,10 +64,12 @@ function CompanyResearchEditor({ jobId }: CompanyResearchPanelProps) {
     }
 
     const timeoutId = window.setTimeout(() => {
-      const saved = saveResearch(jobId, draft);
+      const saved = saveResearch(jobId, { content: draft });
 
       if (saved) {
-        setBaseline(toDraft(saved));
+        const text = getCompanyResearchDisplayContent(saved);
+        setBaseline(text);
+        setDraft(text);
       }
     }, 1000);
 
@@ -106,10 +77,12 @@ function CompanyResearchEditor({ jobId }: CompanyResearchPanelProps) {
   }, [draft, isDirty, jobId, saveResearch]);
 
   const handleManualSave = () => {
-    const saved = saveResearch(jobId, draft);
+    const saved = saveResearch(jobId, { content: draft });
 
     if (saved) {
-      setBaseline(toDraft(saved));
+      const text = getCompanyResearchDisplayContent(saved);
+      setBaseline(text);
+      setDraft(text);
       setToastOpen(true);
     }
   };
@@ -122,7 +95,8 @@ function CompanyResearchEditor({ jobId }: CompanyResearchPanelProps) {
             <div>
               <CardTitle>회사정보</CardTitle>
               <CardDescription className="mt-2">
-                면접 준비에 활용할 회사 이해 내용을 공고별로 정리합니다.
+                면접 준비에 활용할 회사 이해 내용을 하나의 메모로 자유롭게
+                정리합니다.
               </CardDescription>
             </div>
             <div className="flex flex-col items-start gap-2 sm:items-end">
@@ -130,28 +104,27 @@ function CompanyResearchEditor({ jobId }: CompanyResearchPanelProps) {
                 saveStatus={saveStatus}
                 isDirty={isDirty}
               />
-              <Button type="button" variant="secondary" onClick={handleManualSave}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleManualSave}
+                disabled={!ready}
+              >
                 <Save className="size-4" aria-hidden />
                 수동 저장
               </Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="grid gap-4">
-          {fieldConfigs.map((field) => (
-            <Textarea
-              key={field.key}
-              label={field.label}
-              value={draft[field.key] ?? ''}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  [field.key]: event.target.value,
-                }))
-              }
-              className="min-h-28"
-            />
-          ))}
+        <CardContent>
+          <Textarea
+            label="회사정보"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder={COMPANY_RESEARCH_CONTENT_PLACEHOLDER}
+            className="min-h-[32rem] whitespace-pre-wrap"
+            disabled={!ready}
+          />
         </CardContent>
       </Card>
 
