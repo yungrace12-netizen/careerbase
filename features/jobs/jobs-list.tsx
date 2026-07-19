@@ -31,6 +31,9 @@ const statusVariant: Record<
   '최종 결과': 'archive',
 };
 
+const actionButtonClassName =
+  "h-8 gap-1.5 px-2.5 text-[length:var(--text-small)] font-medium text-text-secondary hover:text-text-primary [&_svg:not([class*='size-'])]:size-3.5";
+
 function JobsList({ jobs, onEdit, onArchive }: JobsListProps) {
   return (
     <Card>
@@ -70,8 +73,10 @@ function JobsList({ jobs, onEdit, onArchive }: JobsListProps) {
                       {getDday(job.applicationEndDate)}
                     </Typography>
                   </div>
+                </Link>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <Badge variant={statusVariant[job.boardColumn]}>
                       {job.boardColumn}
                     </Badge>
@@ -82,25 +87,27 @@ function JobsList({ jobs, onEdit, onArchive }: JobsListProps) {
                       마감 {job.applicationEndDate ?? '미정'}
                     </Typography>
                   </div>
-                </Link>
 
-                <div className="mt-4 flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => onEdit(job)}
-                  >
-                    <Pencil className="size-4" aria-hidden />
-                    수정
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => onArchive(job)}
-                  >
-                    <Archive className="size-4" aria-hidden />
-                    Archive 이동
-                  </Button>
+                  <div className="ml-auto flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className={actionButtonClassName}
+                      onClick={() => onEdit(job)}
+                    >
+                      <Pencil className="size-3.5" aria-hidden />
+                      수정
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className={actionButtonClassName}
+                      onClick={() => onArchive(job)}
+                    >
+                      <Archive className="size-3.5" aria-hidden />
+                      Archive 이동
+                    </Button>
+                  </div>
                 </div>
               </article>
             ))}
