@@ -98,13 +98,13 @@ function CareerBaseCalendar({
           )}
         >
           <span className="shrink-0 text-[length:var(--text-caption)] font-semibold">
-            {schedule.dDayLabel}
+            {schedule.type}
           </span>
           <span className="shrink-0 text-[length:var(--text-caption)]">
-            ·
+            -
           </span>
           <span className="min-w-0 truncate text-[length:var(--text-caption)] font-medium">
-            {schedule.type} - {schedule.companyName}
+            {schedule.companyName}
           </span>
         </div>
       );

@@ -33,7 +33,7 @@ const statusVariant: Record<
 
 function JobsList({ jobs, onEdit, onArchive }: JobsListProps) {
   return (
-    <Card className="min-h-full">
+    <Card>
       <CardHeader>
         <CardTitle>공고 목록</CardTitle>
         <CardDescription>지원 마감일 기준으로 정렬됩니다.</CardDescription>

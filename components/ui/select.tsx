@@ -196,7 +196,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             aria-hidden
             tabIndex={-1}
             className="sr-only"
-            onChange={onChange}
+            onChange={onChange ?? (() => undefined)}
             onBlur={onBlur}
             {...props}
           >

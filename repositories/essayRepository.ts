@@ -109,6 +109,19 @@ function deleteEssay(id: EntityId): void {
   });
 }
 
+function getAttachmentsByJobId(jobId: EntityId): AttachmentMetadata[] {
+  const data = readData();
+  const essayIds = new Set(
+    data.essays.filter((essay) => essay.jobId === jobId).map((essay) => essay.id),
+  );
+
+  return data.attachments.filter(
+    (attachment) =>
+      attachment.jobId === jobId ||
+      (attachment.essayId ? essayIds.has(attachment.essayId) : false),
+  );
+}
+
 function getAttachmentsByEssayId(essayId: EntityId): AttachmentMetadata[] {
   return readData().attachments.filter(
     (attachment) => attachment.essayId === essayId,
@@ -119,11 +132,14 @@ function createAttachment(
   input: CreateAttachmentMetadataInput,
 ): AttachmentMetadata | null {
   const data = readData();
+  const jobExists = input.jobId
+    ? data.jobs.some((job) => job.id === input.jobId)
+    : false;
   const essay = input.essayId
     ? data.essays.find((item) => item.id === input.essayId)
     : null;
 
-  if (!essay) {
+  if (!jobExists && !essay) {
     return null;
   }
 
@@ -138,15 +154,17 @@ function createAttachment(
 
   writeData({
     ...data,
-    essays: data.essays.map((item) =>
-      item.id === essay.id
-        ? {
-            ...item,
-            attachmentIds: [...item.attachmentIds, attachment.id],
-            updatedAt: now,
-          }
-        : item,
-    ),
+    essays: essay
+      ? data.essays.map((item) =>
+          item.id === essay.id
+            ? {
+                ...item,
+                attachmentIds: [...item.attachmentIds, attachment.id],
+                updatedAt: now,
+              }
+            : item,
+        )
+      : data.essays,
     attachments: [...data.attachments, attachment],
     lastUpdatedAt: now,
   });
@@ -189,6 +207,28 @@ function updateAttachment(
   return updatedAttachment;
 }
 
+function deleteAttachment(id: EntityId): void {
+  const data = readData();
+  const now = new Date().toISOString();
+
+  writeData({
+    ...data,
+    essays: data.essays.map((essay) =>
+      essay.attachmentIds.includes(id)
+        ? {
+            ...essay,
+            attachmentIds: essay.attachmentIds.filter(
+              (attachmentId) => attachmentId !== id,
+            ),
+            updatedAt: now,
+          }
+        : essay,
+    ),
+    attachments: data.attachments.filter((attachment) => attachment.id !== id),
+    lastUpdatedAt: now,
+  });
+}
+
 function getExperiences(): Experience[] {
   return readData().experiences;
 }
@@ -200,8 +240,10 @@ export const essayRepository = {
   createEssay,
   updateEssay,
   deleteEssay,
+  getAttachmentsByJobId,
   getAttachmentsByEssayId,
   createAttachment,
   updateAttachment,
+  deleteAttachment,
   getExperiences,
 };

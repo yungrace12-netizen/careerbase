@@ -39,7 +39,6 @@ interface EssayQuestionModalState {
 }
 
 interface AttachmentModalState {
-  essay: Essay;
   attachment: AttachmentMetadata | null;
   fileName: string;
   fileType: AttachmentType;
@@ -62,6 +61,7 @@ function EssayTab({ job }: EssayTabProps) {
   const saveAnswer = useEssayStore((state) => state.saveAnswer);
   const createAttachment = useEssayStore((state) => state.createAttachment);
   const updateAttachment = useEssayStore((state) => state.updateAttachment);
+  const deleteAttachment = useEssayStore((state) => state.deleteAttachment);
   const updateEssayExperienceLinks = useEssayStore(
     (state) => state.updateEssayExperienceLinks,
   );
@@ -69,6 +69,8 @@ function EssayTab({ job }: EssayTabProps) {
   const [questionModal, setQuestionModal] =
     React.useState<EssayQuestionModalState | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<Essay | null>(null);
+  const [attachmentDeleteTarget, setAttachmentDeleteTarget] =
+    React.useState<AttachmentMetadata | null>(null);
   const [attachmentModal, setAttachmentModal] =
     React.useState<AttachmentModalState | null>(null);
 
@@ -120,7 +122,7 @@ function EssayTab({ job }: EssayTabProps) {
     } else {
       createAttachment({
         jobId: job.id,
-        essayId: attachmentModal.essay.id,
+        essayId: null,
         ...input,
       });
     }
@@ -154,6 +156,15 @@ function EssayTab({ job }: EssayTabProps) {
         </div>
       </Card>
 
+      <AttachmentSection
+        attachments={attachments}
+        onCreate={() => setAttachmentModal(createAttachmentModalState(null))}
+        onEdit={(attachment) =>
+          setAttachmentModal(createAttachmentModalState(attachment))
+        }
+        onDelete={setAttachmentDeleteTarget}
+      />
+
       {essays.length === 0 ? (
         <Card>
           <EmptyState
@@ -183,9 +194,6 @@ function EssayTab({ job }: EssayTabProps) {
               key={essay.id}
               essay={essay}
               number={index + 1}
-              attachments={attachments.filter((item) =>
-                essay.attachmentIds.includes(item.id),
-              )}
               experiences={experiences}
               saveStatus={saveStatuses[essay.id]}
               onSaveAnswer={handleSaveAnswer}
@@ -197,9 +205,6 @@ function EssayTab({ job }: EssayTabProps) {
                 })
               }
               onDelete={() => setDeleteTarget(essay)}
-              onOpenAttachmentModal={(attachment) =>
-                setAttachmentModal(createAttachmentModalState(essay, attachment))
-              }
               onExperienceIdsChange={(experienceIds) =>
                 updateEssayExperienceLinks(essay.id, experienceIds, job.id)
               }
@@ -219,6 +224,30 @@ function EssayTab({ job }: EssayTabProps) {
         onStateChange={setAttachmentModal}
         onSubmit={handleSubmitAttachment}
       />
+
+      <Modal
+        open={Boolean(attachmentDeleteTarget)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAttachmentDeleteTarget(null);
+          }
+        }}
+        title="첨부파일 정보 삭제"
+        confirmLabel="삭제"
+        danger
+        onConfirm={() => {
+          if (!attachmentDeleteTarget) {
+            return;
+          }
+
+          deleteAttachment(attachmentDeleteTarget.id, job.id);
+          setAttachmentDeleteTarget(null);
+        }}
+      >
+        <Typography variant="body">
+          이 공고 첨부파일 정보를 삭제할까요? 실제 파일은 삭제되지 않습니다.
+        </Typography>
+      </Modal>
 
       <Modal
         open={Boolean(deleteTarget)}
@@ -250,24 +279,20 @@ function EssayTab({ job }: EssayTabProps) {
 function EssayCard({
   essay,
   number,
-  attachments,
   experiences,
   saveStatus,
   onSaveAnswer,
   onEditQuestion,
   onDelete,
-  onOpenAttachmentModal,
   onExperienceIdsChange,
 }: {
   essay: Essay;
   number: number;
-  attachments: AttachmentMetadata[];
   experiences: Experience[];
   saveStatus?: EssaySaveStatus;
   onSaveAnswer: (essayId: EntityId, finalAnswer: string) => void;
   onEditQuestion: () => void;
   onDelete: () => void;
-  onOpenAttachmentModal: (attachment: AttachmentMetadata | null) => void;
   onExperienceIdsChange: (experienceIds: EntityId[]) => void;
 }) {
   const [draftAnswer, setDraftAnswer] = React.useState(essay.finalAnswer);
@@ -334,12 +359,6 @@ function EssayCard({
             </Button>
           </div>
 
-          <AttachmentSection
-            attachments={attachments}
-            onCreate={() => onOpenAttachmentModal(null)}
-            onEdit={onOpenAttachmentModal}
-          />
-
           <ExperienceSection
             experiences={experiences}
             selectedIds={essay.experienceIds}
@@ -355,18 +374,21 @@ function AttachmentSection({
   attachments,
   onCreate,
   onEdit,
+  onDelete,
 }: {
   attachments: AttachmentMetadata[];
   onCreate: () => void;
   onEdit: (attachment: AttachmentMetadata) => void;
+  onDelete: (attachment: AttachmentMetadata) => void;
 }) {
   return (
-    <section className="rounded-[var(--radius-card)] border border-border bg-background p-4">
+    <section className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Typography variant="card-title">첨부파일 정보</Typography>
+          <Typography variant="card-title">공고 첨부파일</Typography>
           <Typography variant="caption" tone="secondary" className="mt-1 block">
-            실제 파일은 업로드하지 않고 보관 위치 정보만 기록합니다.
+            모든 자소서 문항이 공유하는 공고 단위 첨부파일 정보입니다. 실제 파일은
+            업로드하지 않고 보관 위치만 기록합니다.
           </Typography>
         </div>
         <Button type="button" variant="secondary" onClick={onCreate}>
@@ -378,30 +400,54 @@ function AttachmentSection({
       {attachments.length > 0 ? (
         <div className="mt-4 grid gap-2">
           {attachments.map((attachment) => (
-            <button
+            <article
               key={attachment.id}
-              type="button"
-              className="rounded-[var(--radius-card)] border border-border bg-surface p-3 text-left transition-colors hover:bg-muted"
-              onClick={() => onEdit(attachment)}
+              className="rounded-[var(--radius-card)] border border-border bg-background p-3"
             >
-              <div className="flex flex-wrap items-center gap-2">
-                <FileText className="size-4 text-primary" aria-hidden />
-                <Typography variant="small" className="font-medium">
-                  {attachment.fileName}
-                </Typography>
-                <Badge variant="default">{attachment.fileType}</Badge>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <FileText className="size-4 text-primary" aria-hidden />
+                    <Typography variant="small" className="font-medium">
+                      {attachment.fileName}
+                    </Typography>
+                    <Badge variant="default">{attachment.fileType}</Badge>
+                  </div>
+                  <Typography
+                    variant="caption"
+                    tone="secondary"
+                    className="mt-2 block"
+                  >
+                    {attachment.versionDescription || '설명 미입력'} ·{' '}
+                    {attachment.localPathDescription || '보관 위치 미입력'} ·{' '}
+                    {attachment.registeredDate || '등록일 미입력'}
+                  </Typography>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => onEdit(attachment)}
+                  >
+                    <Pencil className="size-4" aria-hidden />
+                    수정
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => onDelete(attachment)}
+                  >
+                    <Trash2 className="size-4" aria-hidden />
+                    삭제
+                  </Button>
+                </div>
               </div>
-              <Typography variant="caption" tone="secondary" className="mt-2 block">
-                {attachment.versionDescription || '설명 미입력'} ·{' '}
-                {attachment.localPathDescription || '보관 위치 미입력'} ·{' '}
-                {attachment.registeredDate || '등록일 미입력'}
-              </Typography>
-            </button>
+            </article>
           ))}
         </div>
       ) : (
         <Typography variant="caption" tone="secondary" className="mt-4 block">
-          등록된 첨부파일 정보가 없습니다.
+          등록된 공고 첨부파일 정보가 없습니다.
         </Typography>
       )}
     </section>
@@ -667,11 +713,9 @@ function SaveStatusText({
 }
 
 function createAttachmentModalState(
-  essay: Essay,
   attachment: AttachmentMetadata | null,
 ): AttachmentModalState {
   return {
-    essay,
     attachment,
     fileName: attachment?.fileName ?? '',
     fileType: attachment?.fileType ?? '자소서',

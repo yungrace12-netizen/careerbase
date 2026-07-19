@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -91,6 +91,16 @@ function JobFormModal({ open, job, onOpenChange, onSubmit }: JobFormModalProps) 
     resolver: zodResolver(jobFormSchema),
     defaultValues: emptyValues,
   });
+  const employmentType = useWatch({
+    control: form.control,
+    name: 'employmentType',
+    defaultValue: '',
+  });
+  const applicantType = useWatch({
+    control: form.control,
+    name: 'applicantType',
+    defaultValue: '',
+  });
 
   React.useEffect(() => {
     if (!open) {
@@ -142,7 +152,13 @@ function JobFormModal({ open, job, onOpenChange, onSubmit }: JobFormModalProps) 
           />
           <Select
             label="고용형태"
-            {...form.register('employmentType')}
+            value={employmentType}
+            onValueChange={(value) =>
+              form.setValue('employmentType', value as JobFormValues['employmentType'], {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
             error={form.formState.errors.employmentType?.message}
           >
             <option value="">선택 안 함</option>
@@ -154,7 +170,13 @@ function JobFormModal({ open, job, onOpenChange, onSubmit }: JobFormModalProps) 
           </Select>
           <Select
             label="신입/경력"
-            {...form.register('applicantType')}
+            value={applicantType}
+            onValueChange={(value) =>
+              form.setValue('applicantType', value as JobFormValues['applicantType'], {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
             error={form.formState.errors.applicantType?.message}
           >
             <option value="">선택 안 함</option>
@@ -216,12 +238,21 @@ function JobFormModal({ open, job, onOpenChange, onSubmit }: JobFormModalProps) 
 }
 
 function jobToFormValues(job: Job): JobFormValues {
+  const legacyJob = job as Job & {
+    jobType?: JobFormValues['employmentType'];
+    employmentForm?: JobFormValues['employmentType'];
+    experienceLevel?: JobFormValues['applicantType'];
+    careerType?: JobFormValues['applicantType'];
+  };
+
   return {
     companyName: job.companyName,
     postingTitle: job.postingTitle,
     position: job.position,
-    employmentType: job.employmentType,
-    applicantType: job.applicantType,
+    employmentType:
+      job.employmentType || legacyJob.employmentForm || legacyJob.jobType || '',
+    applicantType:
+      job.applicantType || legacyJob.experienceLevel || legacyJob.careerType || '',
     postingUrl: job.postingUrl,
     applicationStartDate: job.applicationStartDate ?? '',
     applicationStartTime: job.applicationStartTime ?? '',

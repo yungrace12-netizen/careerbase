@@ -130,7 +130,7 @@ function ExperiencePage() {
         <ContentWrapper className="lg:h-full lg:overflow-hidden">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <Typography variant="body" tone="secondary">
-              프로젝트, 업무, 활동 경험을 STAR 구조로 기록하고 자소서와 면접에서 연결합니다.
+              자소서와 면접에서 재사용할 프로젝트와 성과 경험을 STAR 구조로 저장합니다.
             </Typography>
             <Button type="button" onClick={openCreateEditor}>
               <Plus className="size-5" aria-hidden />

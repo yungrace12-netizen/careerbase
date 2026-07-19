@@ -9,6 +9,25 @@ import type {
   UpdateJobInput,
 } from '@/types/job';
 
+type LegacyJobFields = {
+  jobType?: Job['employmentType'];
+  employmentForm?: Job['employmentType'];
+  experienceLevel?: Job['applicantType'];
+  careerType?: Job['applicantType'];
+};
+
+function normalizeJob(job: Job): Job {
+  const legacyJob = job as Job & LegacyJobFields;
+
+  return {
+    ...job,
+    employmentType:
+      job.employmentType || legacyJob.employmentForm || legacyJob.jobType || '',
+    applicantType:
+      job.applicantType || legacyJob.experienceLevel || legacyJob.careerType || '',
+  };
+}
+
 function sortJobsByDeadline(jobs: Job[]) {
   return [...jobs].sort((a, b) => {
     if (!a.applicationEndDate && !b.applicationEndDate) {
@@ -29,16 +48,20 @@ function sortJobsByDeadline(jobs: Job[]) {
 
 function getJobs(): Job[] {
   return sortJobsByDeadline(
-    readData().jobs.filter((job) => !job.isArchived),
+    readData()
+      .jobs.map(normalizeJob)
+      .filter((job) => !job.isArchived),
   );
 }
 
 function getAllJobs(): Job[] {
-  return sortJobsByDeadline(readData().jobs);
+  return sortJobsByDeadline(readData().jobs.map(normalizeJob));
 }
 
 function getJob(id: EntityId): Job | null {
-  return readData().jobs.find((job) => job.id === id) ?? null;
+  const job = readData().jobs.find((item) => item.id === id);
+
+  return job ? normalizeJob(job) : null;
 }
 
 function createJob(input: CreateJobInput): Job {

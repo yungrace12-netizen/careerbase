@@ -144,7 +144,7 @@ function buildCalendarSchedule({
     dDayLabel: dDayInfo.label,
     isPast: dDayInfo.isPast,
     isToday: dDayInfo.isToday,
-    isDanger: type === '지원 마감' || dDayInfo.label === 'TODAY' || dDayInfo.label === 'D-1',
+    isDanger: type === '지원 마감',
   };
 }
 

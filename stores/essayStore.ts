@@ -34,6 +34,7 @@ interface EssayStore {
     input: UpdateAttachmentMetadataInput,
     jobId: EntityId,
   ) => void;
+  deleteAttachment: (id: EntityId, jobId: EntityId) => void;
   updateEssayExperienceLinks: (
     id: EntityId,
     experienceIds: EntityId[],
@@ -46,17 +47,11 @@ const defaultSaveStatus: EssaySaveStatus = {
   savedAt: null,
 };
 
-function loadAttachmentsForEssays(essays: Essay[]) {
-  return essays.flatMap((essay) =>
-    essayRepository.getAttachmentsByEssayId(essay.id),
-  );
-}
-
 function loadJobScopedData(jobId: EntityId) {
   const essays = essayRepository.getEssaysByJobId(jobId);
   return {
     essays,
-    attachments: loadAttachmentsForEssays(essays),
+    attachments: essayRepository.getAttachmentsByJobId(jobId),
     experiences: experienceRepository.getExperiences(),
   };
 }
@@ -143,6 +138,10 @@ export const useEssayStore = create<EssayStore>((set, get) => ({
   },
   updateAttachment: (id, input, jobId) => {
     essayRepository.updateAttachment(id, input);
+    set(loadJobScopedData(jobId));
+  },
+  deleteAttachment: (id, jobId) => {
+    essayRepository.deleteAttachment(id);
     set(loadJobScopedData(jobId));
   },
   updateEssayExperienceLinks: (id, experienceIds, jobId) => {
